@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Waybar module: Claude Code and Codex usage limits, like Omarchy's agents widget.
+
+The data comes from Omarchy's collectors (bin/omarchy-agent-usage-claude and
+-codex, MIT, copied from github.com/omacom/omarchy), which use each CLI's own
+sign-in. Shows an icon, plus the highest percentage once a limit passes 80%;
+the tooltip lists every limit and when it resets. An agent that isn't
+installed or signed in is left out.
+"""
+import datetime as dt
+import json
+import os
+import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+BIN = Path.home() / ".local/bin"
+AGENTS = {"claude": "Claude Code", "codex": "Codex"}
+ICON = "\U000F06A9"  # nf-md-robot
+
+
+def until(iso):
+    left = dt.datetime.fromisoformat(iso) - dt.datetime.now(dt.timezone.utc)
+    mins = max(0, int(left.total_seconds() // 60))
+    days, mins = divmod(mins, 1440)
+    hours, mins = divmod(mins, 60)
+    return f"{days}d {hours}h" if days else f"{hours}h {mins:02d}m"
+
+
+def collect(agent):
+    # waybar's PATH lacks ~/.local/bin, where the claude and codex installers put the CLIs
+    env = {**os.environ, "PATH": f"{BIN}:{os.environ.get('PATH', '')}"}
+    try:
+        out = subprocess.run([str(BIN / f"omarchy-agent-usage-{agent}"), "--limits-only"],
+                             capture_output=True, text=True, timeout=60, env=env).stdout
+        return json.loads(out)
+    except Exception:
+        return {}
+
+
+def main():
+    with ThreadPoolExecutor() as pool:
+        records = dict(zip(AGENTS, pool.map(collect, AGENTS)))
+
+    sections, percents = [], []
+    for agent, name in AGENTS.items():
+        limits = records[agent].get("limits") or []
+        if not limits:
+            continue
+        # Codex reports raw plan ids like "self_serve_business_prolite"
+        tier = (records[agent].get("tierLabel") or "").removeprefix("self_serve_")
+        tier = tier.replace("_", " ").title() if "_" in tier else tier
+        lines = [f"{name} · {tier}" if tier else name]
+        for limit in limits:
+            pct = round(limit["percent"] * 100)
+            reset = f" · resets in {until(limit['resetsAt'])}" if limit.get("resetsAt") else ""
+            lines.append(f"  {limit['label']}: {pct}%{reset}")
+            percents.append(limit["percent"])
+        sections.append("\n".join(lines))
+
+    if not sections:
+        print(json.dumps({"text": ICON, "tooltip": "No agent usage available", "class": "stale"}))
+        return
+
+    worst = max(percents)
+    css = "critical" if worst >= 0.95 else "warning" if worst >= 0.8 else "normal"
+    # Just the icon; the percentage only shows up once a limit gets close
+    text = f"{ICON} {round(worst * 100)}%" if worst >= 0.8 else ICON
+    print(json.dumps({"text": text, "tooltip": "\n\n".join(sections), "class": css}))
+
+
+if __name__ == "__main__":
+    main()

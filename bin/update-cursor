@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+API_URL="${CURSOR_API_URL:-https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+INSTALL_DIR="${CURSOR_INSTALL_DIR:-$XDG_DATA_HOME/cursor}"
+BIN_DIR="${CURSOR_BIN_DIR:-$HOME/.local/bin}"
+APPIMAGE="$INSTALL_DIR/Cursor.AppImage"
+URL_FILE="$INSTALL_DIR/.download-url"
+VERSION_FILE="$INSTALL_DIR/.version"
+ICON_FILE="$XDG_DATA_HOME/icons/hicolor/256x256/apps/cursor.png"
+DESKTOP_FILE="$XDG_DATA_HOME/applications/cursor.desktop"
+FORCE=0
+
+if [[ "${1:-}" == "--force" ]]; then
+  FORCE=1
+fi
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+require_command curl
+require_command python3
+
+mkdir -p "$INSTALL_DIR" "$BIN_DIR" "$(dirname "$ICON_FILE")" "$(dirname "$DESKTOP_FILE")"
+
+echo "Fetching Cursor release metadata..."
+metadata="$(curl -fsSL "$API_URL")"
+download_url="$(
+  printf '%s' "$metadata" | python3 -c 'import json, sys; print(json.load(sys.stdin).get("downloadUrl", ""))'
+)"
+version="$(
+  printf '%s' "$metadata" | python3 -c 'import json, sys; data=json.load(sys.stdin); print(data.get("version") or data.get("name") or "")'
+)"
+
+if [[ -z "$download_url" ]]; then
+  echo "Cursor metadata did not include a downloadUrl." >&2
+  exit 1
+fi
+
+current_url=""
+if [[ -f "$URL_FILE" ]]; then
+  current_url="$(<"$URL_FILE")"
+fi
+
+if [[ -x "$APPIMAGE" && "$current_url" == "$download_url" && "$FORCE" -eq 0 ]]; then
+  echo "Cursor is already up to date."
+else
+  tmp_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmp_dir"' EXIT
+  tmp_appimage="$tmp_dir/Cursor.AppImage"
+
+  echo "Downloading Cursor AppImage..."
+  curl -fL --progress-bar "$download_url" -o "$tmp_appimage"
+  chmod +x "$tmp_appimage"
+  mv -f "$tmp_appimage" "$APPIMAGE"
+  printf '%s\n' "$download_url" > "$URL_FILE"
+  printf '%s\n' "$version" > "$VERSION_FILE"
+  echo "Installed Cursor ${version:-stable} to $APPIMAGE"
+fi
+
+cat > "$BIN_DIR/cursor" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+appimage="${CURSOR_APPIMAGE:-$HOME/.local/share/cursor/Cursor.AppImage}"
+if [[ ! -x "$appimage" ]]; then
+  echo "Cursor AppImage is not installed at $appimage" >&2
+  echo "Run: update-cursor" >&2
+  exit 127
+fi
+
+args=(--class=cursor)
+
+if [[ "${XDG_SESSION_TYPE:-}" == "wayland" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+  args+=(
+    --ozone-platform=wayland
+    --enable-features=UseOzonePlatform,WaylandWindowDecorations
+    --disable-features=WaylandPerSurfaceScale
+    --enable-wayland-ime
+  )
+fi
+
+exec "$appimage" "${args[@]}" "$@"
+EOF
+chmod +x "$BIN_DIR/cursor"
+
+if [[ -x "$APPIMAGE" && ( ! -f "$ICON_FILE" || "$FORCE" -eq 1 ) ]]; then
+  tmp_icon_dir="$(mktemp -d)"
+  if (cd "$tmp_icon_dir" && "$APPIMAGE" --appimage-extract >/dev/null 2>&1); then
+    if python3 - "$tmp_icon_dir/squashfs-root" "$ICON_FILE" <<'PY'
+import os
+import shutil
+import sys
+
+root, destination = sys.argv[1:]
+candidates = []
+
+for directory, _, files in os.walk(root):
+    for filename in files:
+        if not filename.lower().endswith(".png"):
+            continue
+
+        path = os.path.join(directory, filename)
+        name = filename.lower()
+        score = os.path.getsize(path)
+        if "cursor" in name:
+            score += 10_000_000
+        if "256x256" in path:
+            score += 5_000_000
+        if "app" in name or "code" in name:
+            score += 1_000_000
+        candidates.append((score, path))
+
+if not candidates:
+    raise SystemExit(1)
+
+os.makedirs(os.path.dirname(destination), exist_ok=True)
+shutil.copy2(max(candidates)[1], destination)
+PY
+    then
+      echo "Installed Cursor icon to $ICON_FILE"
+    else
+      echo "Could not find a PNG icon inside the AppImage." >&2
+    fi
+  else
+    echo "Could not extract the AppImage icon. Cursor itself is still installed." >&2
+  fi
+  rm -rf "$tmp_icon_dir"
+fi
+
+cat > "$DESKTOP_FILE" <<EOF
+[Desktop Entry]
+Name=Cursor
+Comment=AI-first code editor
+Exec=$BIN_DIR/cursor %F
+Icon=cursor
+Type=Application
+Categories=Development;IDE;
+StartupWMClass=cursor
+MimeType=inode/directory;text/plain;
+Terminal=false
+EOF
+chmod 644 "$DESKTOP_FILE"
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$XDG_DATA_HOME/applications" >/dev/null 2>&1 || true
+fi
+
+echo "Cursor launcher is installed at $DESKTOP_FILE"
+echo "Terminal command is installed at $BIN_DIR/cursor"

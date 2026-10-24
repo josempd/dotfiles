@@ -1,0 +1,20 @@
+[user]
+	email = contact@jmpd.sh
+	name = Pires
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	default = current
+	autoSetupRemote = true
+[rebase]
+	autoStash = true
+[merge]
+	conflictStyle = zdiff3
+[diff]
+	algorithm = histogram
+[fetch]
+	prune = true
+[rerere]
+	enabled = true

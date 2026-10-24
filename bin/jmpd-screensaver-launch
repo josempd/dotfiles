@@ -1,0 +1,12 @@
+#!/bin/bash
+# Called by hypridle after 15 minutes idle (hypr/hypridle.conf).
+# hypridle's PATH lacks ~/.local/bin, where tte (uv tool) and the screensaver live
+export PATH="$HOME/.local/bin:$PATH"
+command -v tte >/dev/null || { notify-send "Screensaver needs tte: uv tool install terminaltexteffects"; exit 1; }
+pgrep -f -- '--class=jmpd\.screensaver' >/dev/null && exit 0
+pidof hyprlock >/dev/null && exit 0
+
+exec kitty --class=jmpd.screensaver \
+  --override font_size=18 \
+  --override window_padding_width=0 \
+  -e jmpd-screensaver

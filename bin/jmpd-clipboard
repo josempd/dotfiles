@@ -1,0 +1,4 @@
+#!/bin/bash
+# Clipboard history picker (Super+Ctrl+V): pick an entry, it goes back on the clipboard.
+choice=$(cliphist list | wofi --dmenu --prompt "Clipboard" --width 700 --height 420 --cache-file /dev/null) || exit 0
+printf '%s' "$choice" | cliphist decode | wl-copy

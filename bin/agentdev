@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# agentdev [DIR] — single-screen tmux workspace for agent-driven work on a repo.
+#
+#   ┌───────────────────────────┬──────────────────────────────┐
+#   │ claude (main session)     │ nvim: tree + code + diff     │
+#   ├─────────────┬─────────────┤ (project socket for          │
+#   │ agent-lens  │ stage:      │  nvim-open / Ctrl+click)     │
+#   │ (↑↓ Enter)  │ selected    │                              │
+#   │             │ agent, else │                              │
+#   │             │ claude      │                              │
+#   │             │ agents      │                              │
+#   └─────────────┴─────────────┴──────────────────────────────┘
+#   Keys (~/.tmux.conf): Alt+G lazygit popup · Ctrl+Shift+Q kill this session
+#   Ctrl+Shift+W kill pane · Ctrl+Shift+arrows move between panes
+#
+# Re-running attaches to the existing session for that repo.
+set -euo pipefail
+
+dir="$(cd "${1:-.}" && pwd)"
+dir="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || echo "$dir")"
+name="$(basename "$dir")"; name="${name//[^[:alnum:]_-]/_}"
+
+if ! tmux has-session -t "=$name" 2>/dev/null; then
+  claude_pane="$(tmux new-session -d -P -F '#{pane_id}' -s "$name" -n dev -c "$dir" \
+    -x "$(tput cols)" -y "$(tput lines)")"
+  # Don't leave a half-built session behind if a later step fails.
+  trap 'tmux kill-session -t "=$name" 2>/dev/null' ERR
+
+  # nvim opens the file tree on startup (~/.config/nvim/lua/custom/agentic_opts.lua).
+  tmux split-window -h -l 55% -t "$claude_pane" -c "$dir" nvim
+  lens_pane="$(tmux split-window -v -l 35% -P -F '#{pane_id}' -t "$claude_pane" -c "$dir" \
+    "agent-lens --cwd '$dir'")"
+  # The "stage": agent-lens shows the selected agent here (Enter), `claude agents` otherwise.
+  stage_pane="$(tmux split-window -h -l 50% -P -F '#{pane_id}' -t "$lens_pane" -c "$dir" \
+    "claude agents --cwd '$dir'")"
+  tmux set -p -t "$stage_pane" @agent_lens_stage 1
+
+  tmux send-keys -t "$claude_pane" 'claude' C-m
+  tmux select-pane -t "$claude_pane"
+  trap - ERR
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t "$name"
+else
+  tmux attach -t "$name"
+fi

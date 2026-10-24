@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for Cursor AppImage updates daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=30m
+Unit=cursor-update.service
+
+[Install]
+WantedBy=timers.target

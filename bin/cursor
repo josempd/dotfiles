@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+appimage="${CURSOR_APPIMAGE:-$HOME/.local/share/cursor/Cursor.AppImage}"
+if [[ ! -x "$appimage" ]]; then
+  echo "Cursor AppImage is not installed at $appimage" >&2
+  echo "Run: update-cursor" >&2
+  exit 127
+fi
+
+args=(--class=cursor)
+
+if [[ "${XDG_SESSION_TYPE:-}" == "wayland" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+  args+=(
+    --ozone-platform=wayland
+    --enable-features=UseOzonePlatform,WaylandWindowDecorations
+    --disable-features=WaylandPerSurfaceScale
+    --enable-wayland-ime
+  )
+fi
+
+exec "$appimage" "${args[@]}" "$@"

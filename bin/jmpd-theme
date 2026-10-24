@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Apply Omarchy themes (colors.toml + backgrounds) to this Hyprland setup.
+
+  jmpd-theme               pick a theme from a menu
+  jmpd-theme set NAME      apply a theme
+  jmpd-theme bg-next       next background of the current theme
+  jmpd-theme reapply       re-render the current theme (after editing templates)
+  jmpd-theme list          list themes
+  jmpd-theme update        pull the latest Omarchy themes
+
+Themes come from Omarchy's repo (sparse clone in ~/.local/share/omarchy-themes);
+your own go in ~/.config/jmpd-theme/themes/NAME. Templates live in
+~/.local/share/jmpd-theme/templates (dotfiles: themes/templates).
+"""
+import os
+import re
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+HOME = Path.home()
+REPO = HOME / ".local/share/omarchy-themes"
+USER_THEMES = HOME / ".config/jmpd-theme/themes"
+TEMPLATES = HOME / ".local/share/jmpd-theme/templates"
+STATE = HOME / ".config/jmpd-theme"
+
+TARGETS = {
+    "waybar-theme.css": HOME / ".config/waybar/theme.css",
+    "hyprland-theme.lua": HOME / ".config/hypr/theme.lua",
+    "hyprlock-theme.conf": HOME / ".config/hypr/hyprlock-theme.conf",
+    "hyprpaper.conf": HOME / ".config/hypr/hyprpaper.conf",
+    "kitty-theme.conf": HOME / ".config/kitty/current-theme.conf",
+    "wofi.css": HOME / ".config/wofi/style.css",
+    "gtk-settings.ini": HOME / ".config/gtk-3.0/settings.ini",
+    "mako.conf": HOME / ".config/mako/config",
+    "swayosd.css": HOME / ".config/swayosd/style.css",
+}
+# Also rendered to GTK 4's settings.ini
+EXTRA_TARGETS = {"gtk-settings.ini": [HOME / ".config/gtk-4.0/settings.ini"]}
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
+
+
+def fetch():
+    if (REPO / ".git").exists():
+        return
+    print("Fetching Omarchy themes...")
+    subprocess.run(["git", "clone", "-q", "--depth", "1", "--filter=blob:none", "--sparse",
+                    "-b", "quattro", "https://github.com/omacom/omarchy.git", str(REPO)], check=True)
+    subprocess.run(["git", "-C", str(REPO), "sparse-checkout", "set", "themes"], check=True)
+
+
+def themes():
+    found = {}
+    for root in (REPO / "themes", USER_THEMES):
+        if root.is_dir():
+            for d in root.iterdir():
+                if (d / "colors.toml").is_file():
+                    found[d.name] = d
+    return dict(sorted(found.items()))
+
+
+def colors(theme_dir):
+    c = tomllib.loads((theme_dir / "colors.toml").read_text())
+    # Same fallbacks as Omarchy's omarchy-theme-color, for the keys the templates use
+    c.setdefault("muted", c.get("color8", c["foreground"]))
+    c.setdefault("selection", c.get("selection_background", c["muted"]))
+    c.setdefault("selection_background", c["selection"])
+    c.setdefault("bright_foreground", c.get("color15", c["foreground"]))
+    c.setdefault("selection_foreground", c["bright_foreground"])
+    c.setdefault("dark_background", c["background"])
+    c.setdefault("lighter_background", c.get("color0", c["background"]))
+    for name in ("red", "green", "yellow", "blue", "magenta", "cyan"):
+        c.setdefault("bright_" + name, c[name])
+    return c
+
+
+def backgrounds(theme_dir):
+    d = theme_dir / "backgrounds"
+    return sorted(p for p in d.iterdir() if p.suffix.lower() in IMAGE_EXTS) if d.is_dir() else []
+
+
+def render(text, values):
+    def sub(m):
+        key = m.group(1)
+        if key.endswith("_strip"):
+            return values[key[:-6]].lstrip("#")
+        return str(values[key])
+    return re.sub(r"\{\{\s*(\w+)\s*\}\}", sub, text)
+
+
+def state(name, value=None):
+    f = STATE / name
+    if value is None:
+        return f.read_text().strip() if f.exists() else None
+    STATE.mkdir(parents=True, exist_ok=True)
+    f.write_text(f"{value}\n")
+
+
+def apply(name, bg_index=0):
+    all_themes = themes()
+    if name not in all_themes:
+        sys.exit(f"Unknown theme: {name}. Try: jmpd-theme list")
+    theme_dir = all_themes[name]
+    values = colors(theme_dir)
+    bgs = backgrounds(theme_dir)
+    values["wallpaper"] = str(bgs[bg_index % len(bgs)]) if bgs else ""
+
+    dark = values.get("mode", "dark") != "light"
+    values["prefer_dark"] = 1 if dark else 0
+    values["gtk_theme"] = "Adwaita-dark" if dark else "Adwaita"
+
+    for tpl, target in TARGETS.items():
+        text = render((TEMPLATES / tpl).read_text(), values)
+        for t in [target, *EXTRA_TARGETS.get(tpl, [])]:
+            t.parent.mkdir(parents=True, exist_ok=True)
+            t.write_text(text)
+
+    # Apps (Chrome, Electron, libadwaita) follow the portal's color-scheme, read from here
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
+                    "prefer-dark" if dark else "prefer-light"])
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", values["gtk_theme"]])
+    state("current", name)
+    state("background", bg_index % len(bgs) if bgs else 0)
+    reload()
+
+
+def reload():
+    quiet = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+    subprocess.run(["hyprctl", "reload"], **quiet)
+    subprocess.run(["systemctl", "--user", "restart", "waybar.service", "hyprpaper.service"], **quiet)
+    subprocess.run(["pkill", "-USR1", "-x", "kitty"], **quiet)  # kitty rereads its config
+    subprocess.run(["makoctl", "reload"], **quiet)
+    subprocess.run(["systemctl", "--user", "try-restart", "swayosd.service"], **quiet)
+
+
+def pick():
+    names = "\n".join(themes())
+    r = subprocess.run(["wofi", "--dmenu", "--prompt", "Theme", "--width", "300", "--height", "420",
+                        "--cache-file", "/dev/null"], input=names, capture_output=True, text=True)
+    if r.stdout.strip():
+        apply(r.stdout.strip())
+
+
+def main():
+    args = sys.argv[1:]
+    fetch()
+    if not args:
+        pick()
+    elif args[0] == "set" and len(args) == 2:
+        apply(args[1])
+    elif args[0] == "reapply":
+        apply(state("current") or "catppuccin", int(state("background") or 0))
+    elif args[0] == "bg-next":
+        current = state("current") or "catppuccin"
+        apply(current, int(state("background") or 0) + 1)
+    elif args[0] == "list":
+        print("\n".join(themes()))
+    elif args[0] == "update":
+        subprocess.run(["git", "-C", str(REPO), "pull", "-q", "--depth", "1"], check=True)
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main()

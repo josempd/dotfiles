@@ -1,0 +1,31 @@
+#!/bin/sh
+# Holds a logind sleep inhibitor while external power is connected.
+# --on-ac only reports it (exit 0 on AC), for hypridle to skip locking at the desk.
+
+on_ac() {
+	for p in /sys/class/power_supply/*; do
+		case "$(cat "$p/type" 2>/dev/null)" in
+		Mains | USB) [ "$(cat "$p/online" 2>/dev/null)" = 1 ] && return 0 ;;
+		esac
+	done
+	return 1
+}
+
+if [ "$1" = --on-ac ]; then
+	on_ac
+	exit
+fi
+
+if [ "$1" = --hold ]; then
+	while on_ac; do sleep 20; done
+	exit 0
+fi
+
+while :; do
+	if on_ac; then
+		systemd-inhibit --what=sleep --who=ac-no-sleep --why="No sleep on AC power" --mode=block "$0" --hold ||
+			sleep 20
+	else
+		sleep 20
+	fi
+done

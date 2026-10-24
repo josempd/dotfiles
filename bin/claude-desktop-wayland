@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Wrapper around the apt-installed Claude Desktop to fix input/click misalignment
+# under fractional OS scaling on mixed-scale multi-monitor setups (e.g. 150% + 80%).
+#
+# We use the same approach as the VS Code alias in ~/.zshrc rather than the Cursor
+# wrapper: forcing the X11 (XWayland) backend keeps clicks aligned under fractional
+# scaling. The native Wayland path (as Cursor uses) desyncs render vs. input here
+# and clicks land in the wrong place.
+bin="/usr/bin/claude-desktop"
+
+exec "$bin" --class=claude-desktop --ozone-platform=x11 "$@"

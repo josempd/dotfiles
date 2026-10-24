@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Neovim (project instance)
+Comment=Open in the running project nvim, or a new nvim window
+Exec=nvim-open %f
+Icon=nvim
+Terminal=false
+NoDisplay=true
+MimeType=text/markdown;text/plain;text/x-python;application/x-yaml;application/json;

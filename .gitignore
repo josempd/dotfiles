@@ -1,0 +1,19 @@
+# Backups created by local-setup.sh
+*.bak.*
+
+# Secrets — never commit
+*.secret
+*.key
+.env
+.env.*
+secrets/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor junk
+*.swp
+*.swo
+.vscode/
+.idea/

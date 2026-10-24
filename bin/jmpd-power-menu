@@ -1,0 +1,18 @@
+#!/bin/bash
+# Power menu (Super+Escape, or click the battery in the top bar), like Omarchy's.
+
+choice=$(printf '%s\n' \
+  "󰌾  Lock" \
+  "󰒲  Suspend" \
+  "󰍃  Log out" \
+  "󰜉  Reboot" \
+  "󰐥  Shut down" |
+  wofi --dmenu --prompt "Power" --width 300 --height 260 --cache-file /dev/null)
+
+case "$choice" in
+  *Lock) loginctl lock-session ;;
+  *Suspend) systemctl suspend ;;
+  *"Log out") uwsm stop ;;
+  *Reboot) systemctl reboot ;;
+  *"Shut down") systemctl poweroff ;;
+esac

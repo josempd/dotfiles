@@ -1,0 +1,10 @@
+[Unit]
+Description=Block sleep while on AC power
+
+[Service]
+ExecStart=%h/.local/bin/ac-no-sleep
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

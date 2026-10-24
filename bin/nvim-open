@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# nvim-open [+LINE] FILE[:LINE[:COL]]
+# Open FILE in the running project nvim (socket /tmp/nvim-<project>.sock, see
+# ~/.config/nvim/lua/custom/agentic_opts.lua) and focus its tmux pane.
+# Used by kitty hints (ctrl+shift+p>n / >f) and xdg-open (nvim-remote.desktop).
+# Falls back to a new tmux window / kitty window when no nvim is listening.
+set -euo pipefail
+
+line=""
+if [[ "${1:-}" == +* ]]; then line="${1#+}"; shift; fi
+target="${1:?usage: nvim-open [+LINE] FILE}"
+target="${target#file://}"
+# Accept path:line[:col] as printed by compilers, grep and Claude.
+if [[ -z "$line" && "$target" =~ ^(.+):([0-9]+)(:[0-9]+)?:?$ ]]; then
+  target="${BASH_REMATCH[1]}"; line="${BASH_REMATCH[2]}"
+fi
+
+# Pick the socket: explicit, else the project whose name is in the path, else newest.
+pick_socket() {
+  [[ -n "${NVIM_OPEN_SOCK:-}" ]] && { echo "$NVIM_OPEN_SOCK"; return; }
+  local socks=() s proj hint
+  for s in /tmp/nvim-*.sock; do [[ -S "$s" ]] && socks+=("$s"); done
+  ((${#socks[@]})) || return 1
+  hint="$target"
+  [[ "$hint" != /* && -n "${TMUX:-}" ]] && hint="$(tmux display -p '#{pane_current_path}')/$hint"
+  for s in "${socks[@]}"; do
+    proj="${s#/tmp/nvim-}"; proj="${proj%.sock}"
+    [[ "/$hint/" == */"$proj"/* ]] && { echo "$s"; return; }
+  done
+  ls -t "${socks[@]}" | head -n1
+}
+
+if sock="$(pick_socket)" && nvim --server "$sock" --remote-expr '1' >/dev/null 2>&1; then
+  # Relative paths resolve against nvim's cwd (the project root), which is how
+  # Claude prints them.
+  esc="$(nvim --server "$sock" --remote-expr "fnameescape('${target//\'/\'\'}')")"
+  nvim --server "$sock" --remote-send "<C-\\><C-n>:edit ${line:++$line }$esc<CR>" >/dev/null
+  pane="$(nvim --server "$sock" --remote-expr '$TMUX_PANE' 2>/dev/null || true)"
+  if [[ -n "$pane" ]] && command -v tmux >/dev/null; then
+    tmux select-window -t "$pane" 2>/dev/null && tmux select-pane -t "$pane" 2>/dev/null || true
+  fi
+  exit 0
+fi
+
+args=(${line:++$line} "$target")
+if [[ -n "${TMUX:-}" ]]; then
+  tmux new-window -n "$(basename "$target")" nvim "${args[@]}"
+else
+  "$(command -v kitty || echo "$HOME/.local/bin/kitty")" --detach nvim "${args[@]}"
+fi
