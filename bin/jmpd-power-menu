@@ -3,14 +3,16 @@
 
 choice=$(printf '%s\n' \
   "󰌾  Lock" \
+  "󱄄  Screensaver" \
   "󰒲  Suspend" \
   "󰍃  Log out" \
   "󰜉  Reboot" \
   "󰐥  Shut down" |
-  wofi --dmenu --prompt "Power" --width 300 --height 260 --cache-file /dev/null)
+  wofi --dmenu --prompt "Power" --width 300 --height 285 --cache-file /dev/null)
 
 case "$choice" in
   *Lock) loginctl lock-session ;;
+  *Screensaver) ~/.local/bin/jmpd-screensaver-launch ;;
   *Suspend) systemctl suspend ;;
   *"Log out") uwsm stop ;;
   *Reboot) systemctl reboot ;;
