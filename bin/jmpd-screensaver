@@ -1,9 +1,14 @@
 #!/bin/bash
 # Screensaver, adapted from Omarchy's: random tte effects on the JMPD logo in a
-# fullscreen kitty. Any key, or losing focus, quits it. Started by jmpd-screensaver-launch.
+# fullscreen kitty. Any key, or losing focus, quits it into the lock screen (a session lock
+# hides every other window, so the animation can't play while locked). Started by
+# jmpd-screensaver-launch.
 
 exit_screensaver() {
   echo "$(date '+%F %T') exit: $1" >>"${XDG_RUNTIME_DIR:-/tmp}/jmpd-screensaver.log"
+  # Lock before the windows close, so the desktop never shows. Not on a signal: that's the
+  # window on another monitor being closed by the one that locked.
+  [[ "$1" != signal ]] && loginctl lock-session
   hyprctl keyword cursor:invisible false &>/dev/null || true
   pkill -x tte 2>/dev/null
   pkill -f -- '--class=jmpd\.screensaver' 2>/dev/null
