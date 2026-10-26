@@ -3,6 +3,7 @@
 # fullscreen kitty. Any key, or losing focus, quits it. Started by jmpd-screensaver-launch.
 
 exit_screensaver() {
+  echo "$(date '+%F %T') exit: $1" >>"${XDG_RUNTIME_DIR:-/tmp}/jmpd-screensaver.log"
   hyprctl keyword cursor:invisible false &>/dev/null || true
   pkill -x tte 2>/dev/null
   pkill -f -- '--class=jmpd\.screensaver' 2>/dev/null
@@ -16,21 +17,29 @@ screensaver_in_focus() {
 # Started by Hyprland, whose PATH lacks ~/.local/bin (tte)
 export PATH="$HOME/.local/bin:$PATH"
 
-trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
+trap 'exit_screensaver signal' SIGINT SIGTERM SIGHUP SIGQUIT
 
 printf '\033]11;rgb:00/00/00\007'  # black background
 hyprctl keyword cursor:invisible true &>/dev/null
 
-tty=$(tty 2>/dev/null)
+started=$SECONDS
 
 while true; do
   tte -i ~/.config/hypr/screensaver.txt \
     --frame-rate 120 --canvas-width 0 --canvas-height 0 --reuse-canvas --anchor-canvas c --anchor-text c \
     --random-effect --no-eol --no-restore-cursor &
+  effect=$!
 
-  while pgrep -t "${tty#/dev/}" -x tte >/dev/null; do
-    if read -n1 -t 1 || ! screensaver_in_focus; then
-      exit_screensaver
+  while kill -0 "$effect" 2>/dev/null; do
+    if read -n1 -t 1; then
+      exit_screensaver key
+    elif ! screensaver_in_focus; then
+      # Started from the power menu, focus goes back to the old window as wofi closes
+      if (( SECONDS - started < 3 )); then
+        hyprctl dispatch 'hl.dsp.focus({ window = "class:jmpd.screensaver" })' &>/dev/null
+      else
+        exit_screensaver "lost focus"
+      fi
     fi
   done
 done
