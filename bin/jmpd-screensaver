@@ -13,6 +13,9 @@ screensaver_in_focus() {
   hyprctl activewindow -j | jq -e '.class == "jmpd.screensaver"' >/dev/null 2>&1
 }
 
+# Started by Hyprland, whose PATH lacks ~/.local/bin (tte)
+export PATH="$HOME/.local/bin:$PATH"
+
 trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
 
 printf '\033]11;rgb:00/00/00\007'  # black background

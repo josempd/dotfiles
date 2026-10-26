@@ -1,12 +1,14 @@
 #!/bin/bash
-# Called by hypridle after 15 minutes idle (hypr/hypridle.conf).
+# Called by hypridle after 15 minutes idle (hypr/hypridle.conf). Covers every monitor that is on.
 # hypridle's PATH lacks ~/.local/bin, where tte (uv tool) and the screensaver live
 export PATH="$HOME/.local/bin:$PATH"
 command -v tte >/dev/null || { notify-send "Screensaver needs tte: uv tool install terminaltexteffects"; exit 1; }
 pgrep -f -- '--class=jmpd\.screensaver' >/dev/null && exit 0
 pidof hyprlock >/dev/null && exit 0
 
-exec kitty --class=jmpd.screensaver \
-  --override font_size=18 \
-  --override window_padding_width=0 \
-  -e jmpd-screensaver
+# One window per monitor. They share the class, so focus moving between them doesn't
+# count as losing focus, and any key in one closes them all (see jmpd-screensaver)
+cmd="kitty --class=jmpd.screensaver --override font_size=18 --override window_padding_width=0 -e $HOME/.local/bin/jmpd-screensaver"
+for monitor in $(hyprctl monitors -j | jq -r '.[] | select(.dpmsStatus) | .name'); do
+  hyprctl dispatch "hl.dsp.exec_cmd([[$cmd]], { monitor = \"$monitor\" })" >/dev/null
+done
