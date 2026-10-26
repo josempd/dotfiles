@@ -76,7 +76,7 @@ Option+arrows used to be word jumps; they were freed so Super+arrows reach Hyprl
 - **Window buttons**: on the left, `close,maximize:` (gsettings `org.gnome.desktop.wm.preferences button-layout` + the `gtk-settings.ini` theme template). No minimize: Hyprland has no minimized state. Electron apps (Obsidian, Slack) draw their own buttons and ignore it.
 - **Web apps**: `applications/*.desktop` running `google-chrome-stable --app=URL --class=NAME`, icons in `applications/icons/` (from Omarchy) installed to `~/.local/share/icons/hicolor/512x512/apps`. WhatsApp is one.
 - **Lid**: logind ignores it (`system/logind-lid.conf` → `/etc/systemd/logind.conf.d/lid.conf`, applied with `systemctl kill -s HUP systemd-logind`); Hyprland `switch:on/off:Lid Switch` binds turn eDP-1 off/on with `hl.dsp.dpms`.
-- **Network**: systemd-networkd + iwd. wait-online uses `--any` (an unplugged ethernet port stalled boot 2 min).
+- **Network**: systemd-networkd + iwd. `systemd-networkd-wait-online` is masked: docker pulls in network-online.target, so with no known wifi at boot graphical.target waited 2 min and uwsm refused to start Hyprland from SDDM. Nothing should block boot on the network.
 
 ## Themes
 

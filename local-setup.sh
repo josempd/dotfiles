@@ -185,9 +185,10 @@ setup_packages() {
     # Closing the lid does nothing (Hyprland only turns the screen off)
     sudo install -Dm644 "$SCRIPT_DIR/system/logind-lid.conf" /etc/systemd/logind.conf.d/lid.conf
 
-    # Boot waits for network-online; with ethernet unplugged it timed out after 2 min, so Wi-Fi alone is enough
-    sudo install -Dm644 "$SCRIPT_DIR/system/wait-online-any.conf" \
-        /etc/systemd/system/systemd-networkd-wait-online.service.d/any.conf
+    # A laptop must not wait for the network to boot: docker pulls in network-online.target,
+    # graphical.target waits for it, and uwsm won't start Hyprland until graphical.target is up
+    sudo rm -rf /etc/systemd/system/systemd-networkd-wait-online.service.d
+    sudo systemctl mask systemd-networkd-wait-online.service
 
     # Firewall: block incoming, allow outgoing (Omarchy's default)
     if sudo ufw status | grep -q '^Status: active'; then
