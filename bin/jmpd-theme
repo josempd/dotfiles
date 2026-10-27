@@ -80,6 +80,13 @@ def backgrounds(theme_dir):
     return sorted(p for p in d.iterdir() if p.suffix.lower() in IMAGE_EXTS) if d.is_dir() else []
 
 
+def icon_theme(theme_dir):
+    # icons.theme names a Yaru color (yaru-icon-theme); Adwaita when absent or not installed
+    f = theme_dir / "icons.theme"
+    name = f.read_text().strip() if f.is_file() else ""
+    return name if name and Path("/usr/share/icons", name).is_dir() else "Adwaita"
+
+
 def render(text, values):
     def sub(m):
         key = m.group(1)
@@ -109,6 +116,7 @@ def apply(name, bg_index=0):
     dark = values.get("mode", "dark") != "light"
     values["prefer_dark"] = 1 if dark else 0
     values["gtk_theme"] = "Adwaita-dark" if dark else "Adwaita"
+    values["icon_theme"] = icon_theme(theme_dir)
 
     for tpl, target in TARGETS.items():
         text = render((TEMPLATES / tpl).read_text(), values)
@@ -120,6 +128,7 @@ def apply(name, bg_index=0):
     subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
                     "prefer-dark" if dark else "prefer-light"])
     subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", values["gtk_theme"]])
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "icon-theme", values["icon_theme"]])
     state("current", name)
     state("background", bg_index % len(bgs) if bgs else 0)
     reload()

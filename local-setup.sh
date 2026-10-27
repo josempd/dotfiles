@@ -538,6 +538,7 @@ setup_aur_apps() {
 
     local apps=(
         brave-bin
+        yaru-icon-theme
         slack-desktop
         lastpass-cli
     )
