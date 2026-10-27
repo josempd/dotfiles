@@ -141,6 +141,11 @@ pkg_ensure() {
 # 1. Packages
 setup_packages() {
     info "Setting up packages..."
+    # multilib carries Steam and the 32-bit GPU drivers it needs
+    if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+        sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+        ok "multilib enabled"
+    fi
     sudo pacman -Syu --noconfirm
 
     local packages=(
@@ -153,7 +158,7 @@ setup_packages() {
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
         wireplumber pipewire-pulse pipewire-alsa
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty
-        impala bluetui wiremix mako libnotify cliphist swayosd
+        impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
         brightnessctl playerctl power-profiles-daemon ufw
         gnome-keyring xdg-desktop-portal-gtk
         ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji
@@ -236,10 +241,7 @@ setup_nvidia_desktop() {
     fi
 
     # Open kernel modules (Turing and newer), built by DKMS for the stock kernel
-    local pkgs=(linux-headers nvidia-open-dkms nvidia-utils egl-wayland libva-nvidia-driver)
-    # 32-bit GL for Steam and Wine, only when multilib is enabled
-    grep -q '^\[multilib\]' /etc/pacman.conf && pkgs+=(lib32-nvidia-utils)
-    pkg_ensure "${pkgs[@]}"
+    pkg_ensure linux-headers nvidia-open-dkms nvidia-utils egl-wayland libva-nvidia-driver
 
     # The TV's own EDID makes the link drop at 4K@60 (HDMI 2.0 limit): a patched copy replaces it,
     # with deep color and FRL off. drm is built into the kernel, so this goes on the cmdline.
@@ -279,6 +281,17 @@ EOF
     else
         skip "initramfs already up to date"
     fi
+}
+
+# 1c. Steam. It needs a 32-bit Vulkan driver: install the lib32 twins of the GPU drivers present,
+# or pacman picks a provider on its own (the GPU drivers come first, from 1b or the base install)
+setup_steam() {
+    info "Setting up Steam..."
+    local pkgs=() drv
+    for drv in nvidia-utils vulkan-radeon vulkan-intel; do
+        pacman -Qq "$drv" &>/dev/null && pkgs+=("lib32-$drv")
+    done
+    pkg_ensure "${pkgs[@]}" steam
 }
 
 # 2. Set zsh as default shell
@@ -621,6 +634,7 @@ main() {
     info "Starting local setup..."
     setup_packages
     setup_nvidia_desktop
+    setup_steam
     setup_default_shell
     setup_oh_my_zsh
     setup_zsh_plugins

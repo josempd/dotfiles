@@ -78,6 +78,8 @@ local menu        = "pkill -x wofi || uwsm-app -- wofi"
 -- The polkit agent shows the password prompt when an app asks for admin rights.
 hl.on("hyprland.start", function ()
     hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
+    -- Fullscreen XWayland games go to the TV at 4K, not the ultrawide XWayland picked as primary
+    hl.exec_cmd(os.getenv("HOME") .. "/.local/bin/jmpd-xwayland-primary '" .. tv:sub(6) .. "'")
 end)
 
 
@@ -258,6 +260,9 @@ hl.config({
         disable_hyprland_logo    = true,
         disable_splash_rendering = true,  -- no "Thanks fufexan!"-style splash text
         middle_click_paste      = false, -- macOS has no primary selection
+        -- Steam Big Picture loses fullscreen when a game exits and never asks again
+        -- (ValveSoftware/steam-for-linux#8280): hand it to the window focused next
+        exit_window_retains_fullscreen = true,
     },
 })
 
@@ -441,6 +446,15 @@ hl.window_rule({
 
     float      = true,
     fullscreen = true,
+})
+
+-- Steam and its games (class steam_app_<id>) hold off hypridle while fullscreen: no screensaver
+-- or lock in the middle of a game played with a controller
+hl.window_rule({
+    name  = "steam-idle-inhibit",
+    match = { class = "^(steam|steam_app_.*)$" },
+
+    idle_inhibit = "fullscreen",
 })
 
 -- Hyprland-run windowrule
