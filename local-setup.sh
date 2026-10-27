@@ -163,7 +163,7 @@ setup_packages() {
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
         brightnessctl playerctl power-profiles-daemon ufw
         gnome-keyring xdg-desktop-portal-gtk
-        ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji
+        ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra
 
         # Apps
         nautilus sushi imv mpv papers obsidian telegram-desktop discord zed spotify-launcher
