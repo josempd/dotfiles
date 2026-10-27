@@ -461,6 +461,8 @@ setup_hyprland() {
     install_file "$SCRIPT_DIR/uwsm-env" "$HOME/.config/uwsm/env"
     # Agent usage collectors (Omarchy's, vendored) for the bar icon and jmpd-agents-panel
     install_dir "$SCRIPT_DIR/vendor/omarchy-agents" "$HOME/.local/share/jmpd-agents"
+    # pi's llama-local provider (llama-server on this machine) counts as self-hosted
+    install_file "$SCRIPT_DIR/agents-local.json" "$HOME/.config/omarchy/agents/local.json"
     # Screen sharing picker with previews (xdg-desktop-portal-hyprland runs it; colors from jmpd-theme)
     install_file "$SCRIPT_DIR/hypr/xdph.conf" "$HOME/.config/hypr/xdph.conf"
     install_file "$SCRIPT_DIR/share-picker/config.yaml" "$HOME/.config/hyprland-preview-share-picker/config.yaml"

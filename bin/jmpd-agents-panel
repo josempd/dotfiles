@@ -212,6 +212,9 @@ class Panel(Gtk.ApplicationWindow):
             if r.get("hasPromptStats", True) and r.get("todayPrompts"):
                 parts.insert(1, f"{r['todayPrompts']} prompts")
             box.append(label(" · ".join(parts), "muted"))
+        elif r.get("hasLocalStats") and r.get("totalPrompts"):
+            days = r.get("activeDays", 0)
+            box.append(label(f"Quiet this week · {r['totalPrompts']} prompts over {days} days", "muted"))
         return box
 
     def meter(self, limit):
