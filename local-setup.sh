@@ -156,7 +156,7 @@ setup_packages() {
         eza zoxide btop fastfetch tldr man-db less plocate pacman-contrib
 
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
-        wireplumber pipewire-pulse pipewire-alsa
+        wireplumber pipewire-pulse pipewire-alsa pipewire-jack
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
         brightnessctl playerctl power-profiles-daemon ufw
@@ -245,6 +245,10 @@ setup_nvidia_desktop() {
 
     # The TV's own EDID makes the link drop at 4K@60 (HDMI 2.0 limit): a patched copy replaces it,
     # with deep color and FRL off. drm is built into the kernel, so this goes on the cmdline.
+    # Lenovo's HDMI audio as its own sink, next to the TV's (see the file)
+    install_file "$SCRIPT_DIR/pipewire/10-nvidia-hdmi-lenovo.conf" \
+        "$HOME/.config/pipewire/pipewire.conf.d/10-nvidia-hdmi-lenovo.conf"
+
     # Rebuild the initramfs/UKIs only if one of these changed
     local rebuild=0 src dest
     while read -r src dest; do
@@ -582,6 +586,12 @@ setup_configs() {
     [[ -f "$SCRIPT_DIR/p10k.zsh"  ]] && install_file "$SCRIPT_DIR/p10k.zsh"  "$HOME/.p10k.zsh"
     [[ -f "$SCRIPT_DIR/gitconfig" ]] && install_file "$SCRIPT_DIR/gitconfig" "$HOME/.gitconfig"
     [[ -f "$SCRIPT_DIR/tmux.conf" ]] && install_file "$SCRIPT_DIR/tmux.conf" "$HOME/.tmux.conf"
+
+    # WirePlumber rules: Bluetooth A2DP auto-connect, KEF LSX II never suspended
+    local f
+    for f in "$SCRIPT_DIR"/wireplumber/*.conf; do
+        install_file "$f" "$HOME/.config/wireplumber/wireplumber.conf.d/$(basename "$f")"
+    done
 }
 
 # 17. Personal scripts, user services, desktop entries, udev rules
