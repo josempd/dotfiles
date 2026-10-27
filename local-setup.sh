@@ -159,7 +159,7 @@ setup_packages() {
         # (the session itself too, so a bare pacstrap install is enough to start from)
         hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland zram-generator
         wireplumber pipewire-pulse pipewire-alsa pipewire-jack
-        hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty
+        hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
         brightnessctl playerctl power-profiles-daemon ufw
         gnome-keyring xdg-desktop-portal-gtk

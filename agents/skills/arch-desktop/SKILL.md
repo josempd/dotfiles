@@ -55,9 +55,10 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 | Super+Shift+Escape | Log out (`uwsm stop`; never exit Hyprland directly, it leaves user services restart-looping) |
 | Ctrl+Cmd+Q | Lock |
 | Super+Shift+Space | Next wallpaper of the theme |
-| Super+Ctrl+Shift+Space | Theme menu |
+| Super+Ctrl+Shift+Space | Theme menu (wofi with preview thumbnails, cached in `~/.cache/jmpd-theme/previews`) |
 | Super+Ctrl+V | Clipboard history (cliphist + wofi) |
-| Cmd+Shift+3 / 4 / 5 | Screenshot screen / area / area into satty |
+| Cmd+Shift+3 / 4 | Screenshot screen / area, copied |
+| Print, Cmd+Shift+5 | Area into satty, like flameshot: Enter copies and closes, Ctrl+S saves |
 | Cmd+arrows | Line start/end, document top/bottom; Option+Backspace deletes a word |
 
 keyd `[control+shift]` passes Ctrl+Shift+Left/Right through untouched (tmux pane focus); without it they inherit `[control]`'s workspace mapping plus Shift. In kitty, Shift+Enter sends Alt+Enter (`\x1b\r`) so Claude Code/Codex insert a newline, also inside tmux.

@@ -24,6 +24,7 @@ REPO = HOME / ".local/share/omarchy-themes"
 USER_THEMES = HOME / ".config/jmpd-theme/themes"
 TEMPLATES = HOME / ".local/share/jmpd-theme/templates"
 STATE = HOME / ".config/jmpd-theme"
+THUMBS = HOME / ".cache/jmpd-theme/previews"
 
 TARGETS = {
     "waybar-theme.css": HOME / ".config/waybar/theme.css",
@@ -143,12 +144,34 @@ def reload():
     subprocess.run(["systemctl", "--user", "try-restart", "swayosd.service"], **quiet)
 
 
+def thumbnail(theme_dir):
+    # Small copy of the theme's preview.png (or first background), so wofi opens fast
+    src = theme_dir / "preview.png"
+    if not src.is_file():
+        bgs = backgrounds(theme_dir)
+        if not bgs:
+            return None
+        src = bgs[0]
+    out = THUMBS / f"{theme_dir.name}.png"
+    if not out.exists() or out.stat().st_mtime < src.stat().st_mtime:
+        THUMBS.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(src), "-vf", "scale=320:-2",
+                        "-frames:v", "1", str(out)], check=False)
+    return out if out.exists() else None
+
+
 def pick():
-    names = "\n".join(themes())
-    r = subprocess.run(["wofi", "--dmenu", "--prompt", "Theme", "--width", "300", "--height", "420",
-                        "--cache-file", "/dev/null"], input=names, capture_output=True, text=True)
-    if r.stdout.strip():
-        apply(r.stdout.strip())
+    rows = []
+    for name, d in themes().items():
+        thumb = thumbnail(d)
+        rows.append(f"img:{thumb}:text:{name}" if thumb else name)
+    r = subprocess.run(["wofi", "--dmenu", "--prompt", "Theme", "--width", "560", "--height", "640",
+                        "--columns", "2", "--allow-images", "--parse-search",
+                        "-D", "image_size=240", "--cache-file", "/dev/null"],
+                       input="\n".join(rows), capture_output=True, text=True)
+    choice = r.stdout.strip().rsplit(":text:", 1)[-1]
+    if choice:
+        apply(choice)
 
 
 def main():

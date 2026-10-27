@@ -354,8 +354,11 @@ hl.bind("CTRL + SUPER + left",   hl.dsp.focus({ workspace = "e-1" }))         --
 hl.bind("CTRL + SUPER + right",  hl.dsp.focus({ workspace = "e+1" }))         -- Ctrl+Right
 hl.bind("CTRL + SUPER + 3",      hl.dsp.exec_cmd(shots .. ' && grim "$f" && wl-copy < "$f"'))                  -- Cmd+Shift+3
 hl.bind("CTRL + SUPER + 4",      hl.dsp.exec_cmd(shots .. ' && grim -g "$(slurp)" "$f" && wl-copy < "$f"'))    -- Cmd+Shift+4
-hl.bind("CTRL + SUPER + 5",      hl.dsp.exec_cmd(shots .. ' && grim -g "$(slurp)" - | satty --filename - --output-filename "$f" --copy-command wl-copy')) -- Cmd+Shift+5
-hl.bind("Print",                 hl.dsp.exec_cmd(shots .. ' && grim "$f" && wl-copy < "$f"'))
+-- Pick an area, then annotate in satty (like flameshot): Enter copies and closes, Ctrl+S saves
+local annotate = shots .. ' && grim -g "$(slurp)" - | satty --filename - --output-filename "$f" --copy-command wl-copy'
+    .. ' --actions-on-enter save-to-clipboard,exit --early-exit copy save'
+hl.bind("CTRL + SUPER + 5",      hl.dsp.exec_cmd(annotate))                   -- Cmd+Shift+5
+hl.bind("Print",                 hl.dsp.exec_cmd(annotate))
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
