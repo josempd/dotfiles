@@ -301,6 +301,19 @@ setup_steam() {
     pkg_ensure "${pkgs[@]}" steam
 }
 
+# 1d. Local LLM on the RTX 3090: CUDA and the llama.cpp source; building it and the models are by hand
+setup_llama_server() {
+    info "Setting up llama-server..."
+    if ! nvidia_only; then
+        skip "Not the NVIDIA desktop"
+        return 0
+    fi
+    pkg_ensure cuda cmake
+    if [[ ! -d "$HOME/llama.cpp" ]]; then
+        git clone https://github.com/ggml-org/llama.cpp "$HOME/llama.cpp"
+    fi
+}
+
 # 2. Set zsh as default shell
 setup_default_shell() {
     info "Setting up default shell..."
@@ -522,6 +535,20 @@ setup_codex() {
     ok "Codex installed (run: codex login)"
 }
 
+# 12d. pi coding agent (npm, on nvm's Node); config and sessions live in ~/.pi/agent
+setup_pi() {
+    info "Setting up pi..."
+    export NVM_DIR="$HOME/.nvm"
+    # shellcheck source=/dev/null
+    source "$NVM_DIR/nvm.sh"
+    if have pi; then
+        skip "pi already installed: $(pi --version 2>/dev/null | tail -1)"
+        return 0
+    fi
+    npm install -g @earendil-works/pi-coding-agent
+    ok "pi installed"
+}
+
 
 # 12c. Agent skills: one copy in agents/skills, linked for both Claude Code and Codex
 setup_agent_skills() {
@@ -668,6 +695,7 @@ main() {
     setup_packages
     setup_nvidia_desktop
     setup_steam
+    setup_llama_server
     setup_default_shell
     setup_oh_my_zsh
     setup_zsh_plugins
@@ -681,6 +709,7 @@ main() {
     setup_hyprland
     setup_claude
     setup_codex
+    setup_pi
     setup_agent_skills
     setup_aur_apps
     setup_defaults
