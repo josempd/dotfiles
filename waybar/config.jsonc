@@ -10,6 +10,7 @@
   "modules-right": [
     "group/tray-expander",
     "custom/agents",
+    "custom/mempressure",
     "bluetooth",
     "network",
     "pulseaudio",
@@ -128,6 +129,12 @@
     "return-type": "json",
     "interval": 300,
     "on-click": "google-chrome-stable https://claude.ai/settings/usage"
+  },
+  "custom/mempressure": {
+    "exec": "~/.local/bin/jmpd-mem-pressure --waybar",
+    "return-type": "json",
+    "interval": 3,
+    "on-click": "uwsm-app -- kitty btop"
   },
   "tray": {
     "icon-size": 12,

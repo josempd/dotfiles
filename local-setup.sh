@@ -185,10 +185,20 @@ setup_packages() {
     # Closing the lid does nothing (Hyprland only turns the screen off)
     sudo install -Dm644 "$SCRIPT_DIR/system/logind-lid.conf" /etc/systemd/logind.conf.d/lid.conf
 
-    # systemd-oomd kills the worst memory hog under sustained pressure, before the kernel OOM killer
-    sudo install -Dm644 "$SCRIPT_DIR/system/oomd-user.conf" /etc/systemd/system/user@.service.d/oomd.conf
+    # Memory, as in Omarchy: zram the size of RAM, reclaim tuned for it, and systemd-oomd killing
+    # the worst app (app.slice and tmux panes, see systemd-dropins) before the kernel OOM killer
+    sudo rm -f /etc/systemd/system/user@.service.d/oomd.conf
+    sudo install -Dm644 "$SCRIPT_DIR/system/zram-generator.conf" /etc/systemd/zram-generator.conf
+    sudo install -Dm644 "$SCRIPT_DIR/system/sysctl-memory.conf" /etc/sysctl.d/99-jmpd-memory.conf
+    sudo install -Dm644 "$SCRIPT_DIR/system/oomd.conf" /etc/systemd/oomd.conf.d/10-jmpd.conf
+    sudo sysctl -q -p /etc/sysctl.d/99-jmpd-memory.conf
     sudo systemctl daemon-reload
-    sudo systemctl enable --now systemd-oomd.service
+    sudo systemctl enable systemd-oomd.service
+    sudo systemctl restart systemd-oomd.service
+    # Resizing zram swaps it off first, faulting every stored page back in: only while it's empty
+    if [[ $(awk '$1 == "/dev/zram0" {print $4}' /proc/swaps) == 0 ]]; then
+        sudo systemctl restart dev-zram0.swap
+    fi
 
     # A laptop must not wait for the network to boot: docker pulls in network-online.target,
     # graphical.target waits for it, and uwsm won't start Hyprland until graphical.target is up
@@ -527,6 +537,8 @@ setup_scripts() {
     systemctl --user enable --now ac-no-sleep.service cursor-update.timer
     # Volume/brightness popups and clipboard history, inside the Hyprland session
     systemctl --user enable swayosd.service cliphist.service
+    # Memory pressure warnings (notification + waybar), see bin/jmpd-mem-pressure
+    systemctl --user enable jmpd-mem-pressure.service
 
     for f in "$SCRIPT_DIR"/udev/*.rules; do
         if [[ -f "/etc/udev/rules.d/$(basename "$f")" ]] && cmp -s "$f" "/etc/udev/rules.d/$(basename "$f")"; then

@@ -1,0 +1,12 @@
+[Unit]
+Description=Memory pressure warnings (yellow 20%, red 40%)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/jmpd-mem-pressure
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

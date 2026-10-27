@@ -44,6 +44,18 @@
   color: @critical;
 }
 
+#custom-mempressure {
+  margin-right: 17px;
+}
+
+#custom-mempressure.warning {
+  color: @warning;
+}
+
+#custom-mempressure.critical {
+  color: @critical;
+}
+
 #custom-agents.stale {
   opacity: 0.5;
 }

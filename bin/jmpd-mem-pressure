@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Memory pressure warnings, like macOS's yellow/red memory pressure.
+
+Pressure is the kernel's PSI "some avg10": the share of the last 10 seconds in
+which at least one task was stalled waiting for memory (/proc/pressure/memory).
+Full RAM with nothing waiting is green. Yellow at 20%, red at 40%; systemd-oomd
+kills an app at 50% held for 20s (system/oomd.conf).
+
+  jmpd-mem-pressure           daemon: a notification each time the level rises,
+                                listing the biggest memory users
+  jmpd-mem-pressure --waybar  one waybar JSON line: hidden while green
+"""
+import json
+import subprocess
+import sys
+import time
+from collections import defaultdict
+
+YELLOW, RED = 20.0, 40.0
+ICON = ""  # nf-fa-microchip
+REARM_SECONDS = 60  # green this long before the same level notifies again
+
+
+def pressure():
+    with open("/proc/pressure/memory") as f:
+        for line in f:
+            if line.startswith("some "):
+                return float(line.split()[1].split("=")[1])
+    return 0.0
+
+
+def level(p):
+    return 2 if p >= RED else 1 if p >= YELLOW else 0
+
+
+def top_users(n=5):
+    out = subprocess.run(["ps", "-eo", "rss=,comm="], capture_output=True, text=True).stdout
+    total = defaultdict(int)
+    for line in out.splitlines():
+        rss, _, comm = line.strip().partition(" ")
+        if rss.isdigit():
+            total[comm.strip()] += int(rss)
+    top = sorted(total.items(), key=lambda kv: kv[1], reverse=True)[:n]
+    return [f"{kb / 1048576:5.1f} GB  {name}" for name, kb in top]
+
+
+def swap_line():
+    info = {}
+    with open("/proc/meminfo") as f:
+        for line in f:
+            key, value = line.split(":")
+            info[key] = int(value.split()[0])
+    used = (info["SwapTotal"] - info["SwapFree"]) / 1048576
+    return f"Swap {used:.1f} / {info['SwapTotal'] / 1048576:.1f} GB"
+
+
+def waybar():
+    p = pressure()
+    lvl = level(p)
+    if lvl == 0:
+        print(json.dumps({"text": "", "class": "normal"}))
+        return
+    tooltip = "\n".join([f"Memory pressure {p:.0f}%", swap_line(), ""] + top_users())
+    print(json.dumps({"text": f"{ICON} {p:.0f}%", "tooltip": tooltip,
+                      "class": "critical" if lvl == 2 else "warning"}))
+
+
+def notify(lvl, p):
+    title = "Memory pressure critical" if lvl == 2 else "Memory pressure high"
+    body = (f"Apps waited for memory {p:.0f}% of the last 10 s. Close something"
+            + (" now; at 50% the worst app gets killed." if lvl == 2 else ".")
+            + "\n\n" + "\n".join(top_users()))
+    subprocess.run(["notify-send", "-a", "Memory", "-u", "critical" if lvl == 2 else "normal",
+                    title, body])
+
+
+def daemon():
+    notified, green_since = 0, time.monotonic()
+    while True:
+        p = pressure()
+        lvl = level(p)
+        now = time.monotonic()
+        if lvl == 0:
+            if notified and now - green_since >= REARM_SECONDS:
+                notified = 0
+        else:
+            green_since = now
+            if lvl > notified:
+                notify(lvl, p)
+                notified = lvl
+        time.sleep(2)
+
+
+if __name__ == "__main__":
+    waybar() if sys.argv[1:] == ["--waybar"] else daemon()
