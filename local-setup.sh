@@ -158,6 +158,7 @@ setup_packages() {
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
         # (the session itself too, so a bare pacstrap install is enough to start from)
         hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
+        python-gobject gtk4-layer-shell
         wireplumber pipewire-pulse pipewire-alsa pipewire-jack
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
@@ -458,6 +459,8 @@ setup_hyprland() {
     install_file "$SCRIPT_DIR/hypr/hyprland.lua" "$HOME/.config/hypr/hyprland.lua"
     install_file "$SCRIPT_DIR/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
     install_file "$SCRIPT_DIR/uwsm-env" "$HOME/.config/uwsm/env"
+    # Agent usage collectors (Omarchy's, vendored) for the bar icon and jmpd-agents-panel
+    install_dir "$SCRIPT_DIR/vendor/omarchy-agents" "$HOME/.local/share/jmpd-agents"
     # Screen sharing picker with previews (xdg-desktop-portal-hyprland runs it; colors from jmpd-theme)
     install_file "$SCRIPT_DIR/hypr/xdph.conf" "$HOME/.config/hypr/xdph.conf"
     install_file "$SCRIPT_DIR/share-picker/config.yaml" "$HOME/.config/hyprland-preview-share-picker/config.yaml"

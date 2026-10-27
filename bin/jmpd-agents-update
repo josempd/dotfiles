@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Refresh AI agent usage records for the bar icon and jmpd-agents-panel.
+
+  jmpd-agents-update [--force] [--limits-only] [agent...]
+
+Runs Omarchy's collectors (vendored, MIT, in ~/.local/share/jmpd-agents; dotfiles
+vendor/omarchy-agents) in parallel and writes one JSON record per agent to
+~/.local/state/jmpd-agents/usage/<id>.json, as omarchy-agent-usage-update does.
+"""
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+HOME = Path.home()
+VENDOR = HOME / ".local/share/jmpd-agents"
+USAGE = Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state") / "jmpd-agents" / "usage"
+PREFIX = "omarchy-agent-usage-"
+
+
+def collect(path, flags, env):
+    agent = path.name.removeprefix(PREFIX)
+    try:
+        out = subprocess.run([sys.executable, str(path), *flags], capture_output=True, text=True,
+                             timeout=120, env=env).stdout
+        record = json.loads(out)
+    except (subprocess.TimeoutExpired, json.JSONDecodeError):
+        print(f"jmpd-agents-update: {agent} collector failed", file=sys.stderr)
+        return False
+    with tempfile.NamedTemporaryFile("w", dir=USAGE, prefix=f".{agent}.", delete=False) as tmp:
+        json.dump(record, tmp)
+    os.replace(tmp.name, USAGE / f"{agent}.json")
+    return True
+
+
+def main():
+    args = sys.argv[1:]
+    flags = [a for a in args if a in ("--force", "--limits-only")]
+    only = [a for a in args if not a.startswith("--")]
+    USAGE.mkdir(parents=True, exist_ok=True)
+    # waybar and systemd lack ~/.local/bin, where the claude and codex CLIs live
+    env = {**os.environ, "OMARCHY_PATH": str(VENDOR), "PATH": f"{HOME / '.local/bin'}:{os.environ.get('PATH', '')}",
+           "OMARCHY_AGENT_USAGE_REFRESH_AT": f"{time.time():.6f}"}
+    collectors = [p for p in sorted((VENDOR / "bin").glob(PREFIX + "*"))
+                  if not only or p.name.removeprefix(PREFIX) in only]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        ok = all(pool.map(lambda p: collect(p, flags, env), collectors))
+    sys.exit(0 if ok else 1)
+
+
+if __name__ == "__main__":
+    main()

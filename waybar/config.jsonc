@@ -128,7 +128,7 @@
     "exec": "~/.local/bin/jmpd-agent-usage",
     "return-type": "json",
     "interval": 300,
-    "on-click": "brave https://claude.ai/settings/usage"
+    "on-click": "~/.local/bin/jmpd-agents-panel"
   },
   "custom/mempressure": {
     "exec": "~/.local/bin/jmpd-mem-pressure --waybar",

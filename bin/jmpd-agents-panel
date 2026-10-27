@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+"""AI agents panel: limits, balances and token stats per agent, under the top bar.
+
+Click the bar's agent icon to toggle it (running it again closes it); Esc or
+clicking elsewhere closes it too. Reads the records jmpd-agents-update writes to
+~/.local/state/jmpd-agents/usage and refreshes them in the background. Colors
+come from ~/.config/jmpd-agents/panel.css, written by jmpd-theme.
+"""
+import datetime as dt
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+# gtk4-layer-shell must load before libwayland, so Python needs it preloaded
+LIB = "/usr/lib/libgtk4-layer-shell.so"
+if LIB not in os.environ.get("LD_PRELOAD", ""):
+    os.environ["LD_PRELOAD"] = f"{LIB} {os.environ.get('LD_PRELOAD', '')}".strip()
+    os.execv(sys.executable, [sys.executable, *sys.argv])
+
+import gi  # noqa: E402
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk4LayerShell", "1.0")
+from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Gtk4LayerShell as LayerShell  # noqa: E402
+
+HOME = Path.home()
+USAGE = Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state") / "jmpd-agents" / "usage"
+ASSETS = HOME / ".local/share/jmpd-agents/shell/plugins/agents/assets"
+CSS = HOME / ".config/jmpd-agents/panel.css"
+UPDATE = HOME / ".local/bin/jmpd-agents-update"
+
+
+def until(iso):
+    try:
+        left = dt.datetime.fromisoformat(iso) - dt.datetime.now(dt.timezone.utc)
+    except ValueError:
+        return ""
+    mins = max(0, int(left.total_seconds() // 60))
+    days, mins = divmod(mins, 1440)
+    hours, mins = divmod(mins, 60)
+    return f"{days}d {hours}h" if days else f"{hours}h {mins:02d}m" if hours else f"{mins}m"
+
+
+def tokens(n):
+    for unit, size in (("B", 1e9), ("M", 1e6), ("k", 1e3)):
+        if n >= size:
+            return f"{n / size:.1f}{unit}"
+    return str(int(n))
+
+
+def plan(record):
+    # Codex reports raw plan ids like "self_serve_business_prolite"
+    tier = (record.get("tierLabel") or "").removeprefix("self_serve_")
+    return tier.replace("_", " ").title() if "_" in tier else tier
+
+
+def records():
+    found = []
+    for f in sorted(USAGE.glob("*.json")):
+        try:
+            r = json.loads(f.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if r.get("ready"):
+            found.append(r)
+    # Agents with limits first, then by tokens this week
+    return sorted(found, key=lambda r: (not r.get("limits"), -sum(d.get("messageCount", 0) for d in r.get("recentDays", []))))
+
+
+def light_mode():
+    out = subprocess.run(["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                         capture_output=True, text=True).stdout
+    return "light" in out
+
+
+def label(text, *classes, xalign=0.0, **kw):
+    w = Gtk.Label(label=text, xalign=xalign, **kw)
+    for c in classes:
+        w.add_css_class(c)
+    return w
+
+
+class Panel(Gtk.ApplicationWindow):
+    def __init__(self, app):
+        super().__init__(application=app)
+        LayerShell.init_for_window(self)
+        LayerShell.set_namespace(self, "jmpd-agents")
+        LayerShell.set_layer(self, LayerShell.Layer.OVERLAY)
+        LayerShell.set_anchor(self, LayerShell.Edge.TOP, True)
+        LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, True)
+        LayerShell.set_margin(self, LayerShell.Edge.TOP, 6)
+        LayerShell.set_margin(self, LayerShell.Edge.RIGHT, 10)
+        LayerShell.set_keyboard_mode(self, LayerShell.KeyboardMode.ON_DEMAND)
+        self.add_css_class("panel")
+        self.set_default_size(380, -1)
+
+        keys = Gtk.EventControllerKey()
+        keys.connect("key-pressed", lambda _c, key, *_: key == Gdk.KEY_Escape and self.close())
+        self.add_controller(keys)
+        self.connect("notify::is-active", lambda w, _p: w.is_active() or w.close())
+
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        self.box.add_css_class("content")
+        self.set_child(self.box)
+        self.light = light_mode()
+        self.render()
+        self.refresh(force=False)
+
+    def refresh(self, force):
+        self.status.set_text("Refreshing…")
+        argv = [str(UPDATE)] + (["--force"] if force else [])
+        proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE)
+        proc.wait_async(None, lambda *_: self.get_visible() and self.render())
+
+    def render(self):
+        while child := self.box.get_first_child():
+            self.box.remove(child)
+        data = records()
+
+        head = Gtk.Box(spacing=8)
+        head.append(label("Agents", "title", hexpand=True))
+        self.status = label(self.updated(data), "muted")
+        head.append(self.status)
+        button = Gtk.Button(label="\U000F0450")  # nf-md-refresh
+        button.add_css_class("refresh")
+        button.set_tooltip_text("Refresh now")
+        button.connect("clicked", lambda _b: self.refresh(force=True))
+        head.append(button)
+        self.box.append(head)
+
+        if data:
+            self.box.append(self.hero(data))
+        else:
+            self.box.append(label("No agents signed in on this machine", "muted"))
+        for r in data:
+            self.box.append(self.section(r))
+
+    def updated(self, data):
+        stamps = [r.get("updatedAt", "") for r in data if r.get("updatedAt")]
+        if not stamps:
+            return ""
+        try:
+            at = dt.datetime.fromisoformat(max(stamps)).astimezone()
+        except ValueError:
+            return ""
+        return at.strftime("%H:%M")
+
+    def hero(self, data):
+        week = sum(d.get("messageCount", 0) for r in data for d in r.get("recentDays", []))
+        today = sum(r.get("todayTotalTokens", 0) for r in data)
+        prompts = sum(r.get("todayPrompts", 0) for r in data)
+        models = {}
+        for r in data:
+            for m, n in (r.get("todayTokensByModel") or {}).items():
+                models[m] = models.get(m, 0) + n
+        parts = [f"{tokens(today)} tokens today", f"{tokens(week)} this week"]
+        if prompts:
+            parts.insert(1, f"{prompts} prompts")
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        box.add_css_class("hero")
+        box.append(label(" · ".join(parts), "stat"))
+        if models:
+            top = max(models, key=models.get)
+            box.append(label(f"Top model today: {top}", "muted"))
+        return box
+
+    def logo(self, agent):
+        for name in ([f"{agent}-light.svg"] if self.light else []) + [f"{agent}.svg"]:
+            if (ASSETS / name).is_file():
+                img = Gtk.Image.new_from_file(str(ASSETS / name))
+                img.set_pixel_size(20)
+                return img
+        return label("\U000F06A9", "glyph")  # nf-md-robot
+
+    def section(self, r):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box.add_css_class("agent")
+
+        title = Gtk.Box(spacing=8)
+        title.append(self.logo(r.get("id", "")))
+        title.append(label(r.get("name", r.get("id", "")), "name"))
+        title.append(label(plan(r), "muted", hexpand=True))
+        if r.get("limitsStale"):
+            stale = label("\U000F0026", "warning")  # nf-md-alert
+            stale.set_tooltip_text(r.get("authHelpText") or "Showing the last known limits")
+            title.append(stale)
+        box.append(title)
+
+        if r.get("usageStatusText"):
+            status = label(r["usageStatusText"], "critical", wrap=True)
+            status.set_tooltip_text(r.get("authHelpText") or None)
+            box.append(status)
+
+        for limit in r.get("limits") or []:
+            box.append(self.meter(limit))
+
+        balance = r.get("balance")
+        if balance:
+            cur = "$" if balance.get("currency") == "USD" else f"{balance.get('currency', '')} "
+            text = f"Balance {cur}{balance.get('remaining', 0):.2f}"
+            if balance.get("funded"):
+                text += f" of {cur}{balance['funded']:.2f}"
+            box.append(label(text, "stat"))
+
+        week = sum(d.get("messageCount", 0) for d in r.get("recentDays", []))
+        if r.get("hasLocalStats") and week:
+            parts = [f"{tokens(r.get('todayTotalTokens', 0))} today", f"{tokens(week)} this week"]
+            if r.get("hasPromptStats", True) and r.get("todayPrompts"):
+                parts.insert(1, f"{r['todayPrompts']} prompts")
+            box.append(label(" · ".join(parts), "muted"))
+        return box
+
+    def meter(self, limit):
+        pct = max(0.0, min(1.0, float(limit.get("percent") or 0)))
+        row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        line = Gtk.Box(spacing=8)
+        line.append(label(limit.get("title") or limit.get("label", ""), "limit", hexpand=True))
+        reset = until(limit["resetsAt"]) if limit.get("resetsAt") else ""
+        line.append(label(f"{round(pct * 100)}%" + (f" · resets in {reset}" if reset else ""), "muted"))
+        row.append(line)
+        bar = Gtk.ProgressBar(fraction=pct)
+        bar.add_css_class("critical" if pct >= 0.95 else "warning" if pct >= 0.8 else "normal")
+        bar.set_tooltip_text(limit.get("label", ""))
+        row.append(bar)
+        return row
+
+
+class App(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="dev.jmpd.AgentsPanel", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        self.panel = None
+
+    def do_startup(self):
+        Gtk.Application.do_startup(self)
+        css = Gtk.CssProvider()
+        if CSS.is_file():
+            css.load_from_path(str(CSS))
+        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css,
+                                                  Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def do_activate(self):
+        # A second launch (another click on the bar icon) closes the open panel
+        if self.panel:
+            self.panel.close()
+            return
+        self.panel = Panel(self)
+        self.panel.connect("close-request", lambda *_: GLib.idle_add(self.quit) and False)
+        self.panel.present()
+
+
+if __name__ == "__main__":
+    sys.exit(App().run(None))

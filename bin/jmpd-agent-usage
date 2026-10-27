@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
-"""Waybar module: Claude Code and Codex usage limits, like Omarchy's agents widget.
+"""Waybar module: AI agent usage limits, like Omarchy's agents widget.
 
-The data comes from Omarchy's collectors (bin/jmpd-agent-usage-claude and
--codex: omarchy-agent-usage-*, MIT, copied from github.com/omacom/omarchy), which use each CLI's own
-sign-in. Shows an icon, plus the highest percentage once a limit passes 80%;
-the tooltip lists every limit and when it resets. An agent that isn't
-installed or signed in is left out.
+Refreshes the records with jmpd-agents-update --limits-only (Omarchy's collectors,
+vendored) and reads them from ~/.local/state/jmpd-agents/usage. Shows an icon, plus
+the highest percentage once a limit passes 80%; the tooltip lists every limit and
+when it resets. Clicking opens jmpd-agents-panel.
 """
 import datetime as dt
 import json
 import os
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-BIN = Path.home() / ".local/bin"
-AGENTS = {"claude": "Claude Code", "codex": "Codex"}
+HOME = Path.home()
+USAGE = Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state") / "jmpd-agents" / "usage"
 ICON = "\U000F06A9"  # nf-md-robot
 
 
@@ -27,28 +25,27 @@ def until(iso):
     return f"{days}d {hours}h" if days else f"{hours}h {mins:02d}m"
 
 
-def collect(agent):
-    # waybar's PATH lacks ~/.local/bin, where the claude and codex installers put the CLIs
-    env = {**os.environ, "PATH": f"{BIN}:{os.environ.get('PATH', '')}"}
-    try:
-        out = subprocess.run([str(BIN / f"jmpd-agent-usage-{agent}"), "--limits-only"],
-                             capture_output=True, text=True, timeout=60, env=env).stdout
-        return json.loads(out)
-    except Exception:
-        return {}
+def records():
+    subprocess.run([str(HOME / ".local/bin/jmpd-agents-update"), "--limits-only"],
+                   capture_output=True, timeout=180)
+    found = []
+    for f in sorted(USAGE.glob("*.json")):
+        try:
+            r = json.loads(f.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if r.get("ready") and r.get("limits"):
+            found.append(r)
+    return found
 
 
 def main():
-    with ThreadPoolExecutor() as pool:
-        records = dict(zip(AGENTS, pool.map(collect, AGENTS)))
-
     sections, percents = [], []
-    for agent, name in AGENTS.items():
-        limits = records[agent].get("limits") or []
-        if not limits:
-            continue
+    for record in records():
+        limits = record["limits"]
+        name = record.get("name", record.get("id", ""))
         # Codex reports raw plan ids like "self_serve_business_prolite"
-        tier = (records[agent].get("tierLabel") or "").removeprefix("self_serve_")
+        tier = (record.get("tierLabel") or "").removeprefix("self_serve_")
         tier = tier.replace("_", " ").title() if "_" in tier else tier
         lines = [f"{name} · {tier}" if tier else name]
         for limit in limits:

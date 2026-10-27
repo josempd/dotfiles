@@ -1,0 +1,86 @@
+/* Agents panel (jmpd-agents-panel), square like the bar and lockscreen. Colors from the current theme (jmpd-theme). */
+window.panel {
+  background: transparent;
+}
+
+.content {
+  background-color: {{ background }};
+  border: 2px solid {{ accent }};
+  padding: 16px 18px;
+  font-family: 'JetBrainsMono Nerd Font';
+  font-size: 13px;
+  color: {{ foreground }};
+}
+
+.title {
+  font-size: 15px;
+  font-weight: bold;
+  color: {{ bright_foreground }};
+}
+
+.name {
+  font-weight: bold;
+  color: {{ bright_foreground }};
+}
+
+.muted {
+  color: {{ muted }};
+}
+
+.stat {
+  color: {{ foreground }};
+}
+
+.hero {
+  padding-bottom: 10px;
+  border-bottom: 1px solid {{ lighter_background }};
+}
+
+.agent {
+  padding-top: 2px;
+}
+
+.glyph {
+  color: {{ accent }};
+}
+
+.warning {
+  color: {{ yellow }};
+}
+
+.critical {
+  color: {{ red }};
+}
+
+button.refresh {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 4px;
+  min-height: 0;
+  color: {{ muted }};
+}
+
+button.refresh:hover {
+  color: {{ accent }};
+}
+
+progressbar trough {
+  min-height: 6px;
+  border-radius: 0;
+  background-color: {{ lighter_background }};
+}
+
+progressbar progress {
+  min-height: 6px;
+  border-radius: 0;
+  background-color: {{ accent }};
+}
+
+progressbar.warning progress {
+  background-color: {{ yellow }};
+}
+
+progressbar.critical progress {
+  background-color: {{ red }};
+}
