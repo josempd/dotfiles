@@ -43,7 +43,7 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 |---|---|
 | Super+Space, Cmd+Space | App launcher (wofi) |
 | Super+T, Super+Return | Terminal (kitty) |
-| Super+B | Chrome |
+| Super+B | Brave (default browser) |
 | Super+E | Files (nautilus) |
 | Super+Q, Cmd+Q | Close window (Cmd+W closes tabs) |
 | Super+arrows, Super+H/J/K/L | Focus window |
@@ -77,7 +77,7 @@ Option+arrows used to be word jumps; they were freed so Super+arrows reach Hyprl
 - **Gaming**: multilib enabled, `steam` with the lib32 twins of the installed GPU drivers (`setup_steam`). Steam and `steam_app_*` windows inhibit idle while fullscreen; `misc.exit_window_retains_fullscreen` keeps Big Picture fullscreen after a game exits; `bin/jmpd-xwayland-primary` makes the Samsung TV the X primary at Hyprland start, so fullscreen XWayland games size to its 4K instead of the ultrawide.
 - **Boot**: systemd-boot with UKIs, Arch's default splash. No Plymouth.
 - **Window buttons**: on the left, `close,maximize:` (gsettings `org.gnome.desktop.wm.preferences button-layout` + the `gtk-settings.ini` theme template). No minimize: Hyprland has no minimized state. Electron apps (Obsidian, Slack) draw their own buttons and ignore it.
-- **Web apps**: `applications/*.desktop` running `google-chrome-stable --app=URL --class=NAME`, icons in `applications/icons/` (from Omarchy) installed to `~/.local/share/icons/hicolor/512x512/apps`. WhatsApp is one.
+- **Web apps**: `applications/*.desktop` running `brave --app=URL --class=NAME`, icons in `applications/icons/` (from Omarchy) installed to `~/.local/share/icons/hicolor/512x512/apps`. WhatsApp is one.
 - **Lid**: logind ignores it (`system/logind-lid.conf` → `/etc/systemd/logind.conf.d/lid.conf`, applied with `systemctl kill -s HUP systemd-logind`); Hyprland `switch:on/off:Lid Switch` binds turn eDP-1 off/on with `hl.dsp.dpms`.
 - **Network**: systemd-networkd + iwd. `systemd-networkd-wait-online` is masked: docker pulls in network-online.target, so with no known wifi at boot graphical.target waited 2 min and uwsm refused to start Hyprland from SDDM. Nothing should block boot on the network.
 

@@ -94,7 +94,7 @@ hl.env("HYPRCURSOR_SIZE", "24")
 
 -- NVIDIA as the only GPU (the RTX 3090 desktop): it drives the screens, so VA-API and GLX use its
 -- driver too. Not on the laptop, where the panel is on the AMD iGPU and forcing these gives
--- Chrome black video. Same test as nvidia_only in local-setup.sh.
+-- Chromium (Brave) black video. Same test as nvidia_only in local-setup.sh.
 local gpus = io.popen([[for d in /sys/bus/pci/devices/*; do
     case "$(cat "$d/class")" in 0x03*) cat "$d/vendor" ;; esac
 done | sort -u]])
@@ -324,7 +324,7 @@ hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm-app -- google-chrome-stable"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm-app -- brave"))
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + h/j/k/l or arrows

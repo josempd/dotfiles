@@ -538,7 +538,6 @@ setup_aur_apps() {
 
     local apps=(
         brave-bin
-        google-chrome
         slack-desktop
         lastpass-cli
     )
@@ -562,6 +561,11 @@ setup_defaults() {
             ok "Evince set as default PDF viewer"
         fi
     fi
+    if have xdg-settings && [[ "$(xdg-settings get default-web-browser)" != "brave-browser.desktop" ]]; then
+        xdg-settings set default-web-browser brave-browser.desktop
+        ok "Brave set as default browser"
+    fi
+    if have xdg-mime; then xdg-mime default brave-browser.desktop x-scheme-handler/mailto; fi
 }
 
 # 15. keyd — low-level key remapper (macOS-style Cmd keybinds via Left Alt)
