@@ -90,6 +90,19 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
+-- NVIDIA as the only GPU (the RTX 3090 desktop): it drives the screens, so VA-API and GLX use its
+-- driver too. Not on the laptop, where the panel is on the AMD iGPU and forcing these gives
+-- Chrome black video. Same test as nvidia_only in local-setup.sh.
+local gpus = io.popen([[for d in /sys/bus/pci/devices/*; do
+    case "$(cat "$d/class")" in 0x03*) cat "$d/vendor" ;; esac
+done | sort -u]])
+if gpus and gpus:read("a") == "0x10de\n" then
+    hl.env("NVD_BACKEND", "direct")
+    hl.env("LIBVA_DRIVER_NAME", "nvidia")
+    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+end
+if gpus then gpus:close() end
+
 
 -----------------------
 ----- PERMISSIONS -----

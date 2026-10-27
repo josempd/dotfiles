@@ -217,6 +217,70 @@ setup_packages() {
     fi
 }
 
+# NVIDIA is the only GPU (the RTX 3090 desktop). The laptop's NVIDIA sits next to the AMD iGPU
+# that drives its panel, so this is false there.
+nvidia_only() {
+    local d vendors=""
+    for d in /sys/bus/pci/devices/*; do
+        [[ $(<"$d/class") == 0x03* ]] && vendors+="$(<"$d/vendor") "
+    done
+    [[ -n "$vendors" && -z "${vendors//0x10de /}" ]]
+}
+
+# 1b. NVIDIA desktop: driver, early KMS, and the Samsung TV's EDID fix
+setup_nvidia_desktop() {
+    info "Setting up NVIDIA desktop..."
+    if ! nvidia_only; then
+        skip "NVIDIA is not the only GPU"
+        return 0
+    fi
+
+    # Open kernel modules (Turing and newer), built by DKMS for the stock kernel
+    local pkgs=(linux-headers nvidia-open-dkms nvidia-utils egl-wayland libva-nvidia-driver)
+    # 32-bit GL for Steam and Wine, only when multilib is enabled
+    grep -q '^\[multilib\]' /etc/pacman.conf && pkgs+=(lib32-nvidia-utils)
+    pkg_ensure "${pkgs[@]}"
+
+    # The TV's own EDID makes the link drop at 4K@60 (HDMI 2.0 limit): a patched copy replaces it,
+    # with deep color and FRL off. drm is built into the kernel, so this goes on the cmdline.
+    # Rebuild the initramfs/UKIs only if one of these changed
+    local rebuild=0 src dest
+    while read -r src dest; do
+        cmp -s "$SCRIPT_DIR/$src" "$dest" && continue
+        sudo install -Dm644 "$SCRIPT_DIR/$src" "$dest"
+        ok "Installed: $dest"
+        rebuild=1
+    done <<EOF
+system/edid/samsung_patched.bin /usr/lib/firmware/edid/samsung_patched.bin
+system/nvidia-modprobe.conf /etc/modprobe.d/nvidia.conf
+system/nvidia-mkinitcpio.conf /etc/mkinitcpio.conf.d/nvidia.conf
+EOF
+
+    # UKIs take the cmdline from /etc/kernel/cmdline if it exists, else /etc/cmdline.d/*.conf
+    local params
+    params="$(<"$SCRIPT_DIR/system/nvidia-cmdline.conf")"
+    if [[ -f /etc/kernel/cmdline ]]; then
+        if ! grep -q 'drm.edid_firmware=' /etc/kernel/cmdline; then
+            sudo sed -i "s#\$# $params#" /etc/kernel/cmdline
+            ok "Added to /etc/kernel/cmdline: $params"
+            rebuild=1
+        fi
+    elif ! cmp -s "$SCRIPT_DIR/system/nvidia-cmdline.conf" /etc/cmdline.d/nvidia.conf; then
+        sudo install -Dm644 "$SCRIPT_DIR/system/nvidia-cmdline.conf" /etc/cmdline.d/nvidia.conf
+        ok "Installed: /etc/cmdline.d/nvidia.conf"
+        rebuild=1
+    fi
+    if ! grep -qs '^default_uki' /etc/mkinitcpio.d/linux.preset; then
+        warn "Not booting UKIs: add to the bootloader's kernel cmdline by hand: $params"
+    fi
+
+    if (( rebuild )); then
+        sudo mkinitcpio -P
+    else
+        skip "initramfs already up to date"
+    fi
+}
+
 # 2. Set zsh as default shell
 setup_default_shell() {
     info "Setting up default shell..."
@@ -556,6 +620,7 @@ setup_scripts() {
 main() {
     info "Starting local setup..."
     setup_packages
+    setup_nvidia_desktop
     setup_default_shell
     setup_oh_my_zsh
     setup_zsh_plugins
