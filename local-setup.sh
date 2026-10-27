@@ -157,7 +157,7 @@ setup_packages() {
 
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
         # (the session itself too, so a bare pacstrap install is enough to start from)
-        hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland zram-generator
+        hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
         wireplumber pipewire-pulse pipewire-alsa pipewire-jack
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
@@ -457,6 +457,7 @@ setup_hyprland() {
     info "Setting up Hyprland config..."
     install_file "$SCRIPT_DIR/hypr/hyprland.lua" "$HOME/.config/hypr/hyprland.lua"
     install_file "$SCRIPT_DIR/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
+    install_file "$SCRIPT_DIR/uwsm-env" "$HOME/.config/uwsm/env"
 
     # Omarchy 3.8 look: top bar, lockscreen and screensaver
     install_file "$SCRIPT_DIR/hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"

@@ -1,0 +1,3 @@
+# Session environment, read by uwsm at login (~/.config/uwsm/env)
+# Qt apps (polkit dialog, etc.) take colors and icons from qt6ct, written by jmpd-theme
+export QT_QPA_PLATFORMTHEME=qt6ct

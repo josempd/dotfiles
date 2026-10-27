@@ -36,6 +36,8 @@ TARGETS = {
     "gtk-settings.ini": HOME / ".config/gtk-3.0/settings.ini",
     "mako.conf": HOME / ".config/mako/config",
     "swayosd.css": HOME / ".config/swayosd/style.css",
+    "qt6ct.conf": HOME / ".config/qt6ct/qt6ct.conf",
+    "qt6ct-colors.conf": HOME / ".config/qt6ct/colors/jmpd.conf",
 }
 # Also rendered to GTK 4's settings.ini
 EXTRA_TARGETS = {"gtk-settings.ini": [HOME / ".config/gtk-4.0/settings.ini"]}
@@ -118,6 +120,7 @@ def apply(name, bg_index=0):
     values["prefer_dark"] = 1 if dark else 0
     values["gtk_theme"] = "Adwaita-dark" if dark else "Adwaita"
     values["icon_theme"] = icon_theme(theme_dir)
+    values["home"] = str(HOME)
 
     for tpl, target in TARGETS.items():
         text = render((TEMPLATES / tpl).read_text(), values)
