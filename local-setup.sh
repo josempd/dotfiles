@@ -301,7 +301,7 @@ setup_steam() {
     pkg_ensure "${pkgs[@]}" steam
 }
 
-# 1d. Local LLM on the RTX 3090: CUDA and the llama.cpp source; building it and the models are by hand
+# 1d. Local LLM on the RTX 3090: CUDA and llama.cpp (pinned, built with CUDA); the models are fetched by hand
 setup_llama_server() {
     info "Setting up llama-server..."
     if ! nvidia_only; then
@@ -309,8 +309,17 @@ setup_llama_server() {
         return 0
     fi
     pkg_ensure cuda cmake
+    # The tested version; move it when upgrading on purpose
+    local ref=4f37f519722aa3242eecb7649466b4a4a2d6d6da
     if [[ ! -d "$HOME/llama.cpp" ]]; then
         git clone https://github.com/ggml-org/llama.cpp "$HOME/llama.cpp"
+        git -C "$HOME/llama.cpp" checkout -q "$ref"
+    fi
+    # Build only when missing or broken (e.g. after a CUDA major version bump), never just to update
+    if ! "$HOME/llama.cpp/build/bin/llama-server" --version >/dev/null 2>&1; then
+        cmake -S "$HOME/llama.cpp" -B "$HOME/llama.cpp/build" -DGGML_CUDA=ON -DCMAKE_CUDA_COMPILER=/opt/cuda/bin/nvcc
+        cmake --build "$HOME/llama.cpp/build" --config Release -j "$(nproc)" --target llama-server
+        ok "llama-server built"
     fi
 }
 
