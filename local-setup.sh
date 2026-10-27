@@ -458,6 +458,9 @@ setup_hyprland() {
     install_file "$SCRIPT_DIR/hypr/hyprland.lua" "$HOME/.config/hypr/hyprland.lua"
     install_file "$SCRIPT_DIR/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
     install_file "$SCRIPT_DIR/uwsm-env" "$HOME/.config/uwsm/env"
+    # Screen sharing picker with previews (xdg-desktop-portal-hyprland runs it; colors from jmpd-theme)
+    install_file "$SCRIPT_DIR/hypr/xdph.conf" "$HOME/.config/hypr/xdph.conf"
+    install_file "$SCRIPT_DIR/share-picker/config.yaml" "$HOME/.config/hyprland-preview-share-picker/config.yaml"
 
     # Omarchy 3.8 look: top bar, lockscreen and screensaver
     install_file "$SCRIPT_DIR/hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
@@ -540,6 +543,7 @@ setup_aur_apps() {
     local apps=(
         brave-bin
         yaru-icon-theme
+        hyprland-preview-share-picker-git
         slack-desktop
         lastpass-cli
     )

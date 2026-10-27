@@ -38,6 +38,7 @@ TARGETS = {
     "swayosd.css": HOME / ".config/swayosd/style.css",
     "qt6ct.conf": HOME / ".config/qt6ct/qt6ct.conf",
     "qt6ct-colors.conf": HOME / ".config/qt6ct/colors/jmpd.conf",
+    "share-picker.css": HOME / ".config/hyprland-preview-share-picker/theme.css",
 }
 # Also rendered to GTK 4's settings.ini
 EXTRA_TARGETS = {"gtk-settings.ini": [HOME / ".config/gtk-4.0/settings.ini"]}
