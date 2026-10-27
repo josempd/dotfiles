@@ -28,7 +28,7 @@ Never edit only the live file. Change the file in `~/code/dotfiles`, copy it to 
 
 ## Working constraints
 
-- No passwordless sudo, and `! sudo ...` fails (no tty). For root steps write a short script to `~/f.sh` and have the user run `sudo sh ~/f.sh` in kitty (they cannot copy text from a raw tty). Delete it afterwards.
+- No passwordless sudo, and `sudo` has no tty here. For root steps run `pkexec CMD` (wrap with `timeout 120`): polkit-kde shows a themed password dialog and the output comes back. Never add NOPASSWD rules.
 - systemd user services (waybar, hypridle, hyprpaper) have a PATH without `~/.local/bin`: use full paths in their commands, or prepend it inside scripts.
 - `HYPRLAND_INSTANCE_SIGNATURE` in a long-lived shell goes stale after re-login: `export HYPRLAND_INSTANCE_SIGNATURE=$(ls -t /run/user/1000/hypr/ | head -1)`.
 - Screenshots to check visual changes: `grim` (output is 2560x1600 at scale 1.6, so `-g` takes logical coords up to 1600x1000).
