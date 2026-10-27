@@ -35,9 +35,11 @@ hl.monitor({
 ---------------------
 
 -- Set programs that you use
-local terminal    = "kitty"
-local fileManager = "nautilus"
-local menu        = "pkill -x wofi || wofi"
+-- Apps go through uwsm-app so each gets its own systemd scope: an OOM kill then takes one app,
+-- not the compositor's cgroup (and with it the session).
+local terminal    = "uwsm-app -- kitty"
+local fileManager = "uwsm-app -- nautilus"
+local menu        = "pkill -x wofi || uwsm-app -- wofi"
 
 
 -------------------
@@ -282,7 +284,7 @@ hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("google-chrome-stable"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm-app -- google-chrome-stable"))
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + h/j/k/l or arrows

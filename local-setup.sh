@@ -185,6 +185,11 @@ setup_packages() {
     # Closing the lid does nothing (Hyprland only turns the screen off)
     sudo install -Dm644 "$SCRIPT_DIR/system/logind-lid.conf" /etc/systemd/logind.conf.d/lid.conf
 
+    # systemd-oomd kills the worst memory hog under sustained pressure, before the kernel OOM killer
+    sudo install -Dm644 "$SCRIPT_DIR/system/oomd-user.conf" /etc/systemd/system/user@.service.d/oomd.conf
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now systemd-oomd.service
+
     # A laptop must not wait for the network to boot: docker pulls in network-online.target,
     # graphical.target waits for it, and uwsm won't start Hyprland until graphical.target is up
     sudo rm -rf /etc/systemd/system/systemd-networkd-wait-online.service.d
