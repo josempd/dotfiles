@@ -152,7 +152,7 @@ setup_packages() {
         # Base and shell
         zsh git curl wget ca-certificates base-devel unzip
         ripgrep fd fzf jq bat git-delta lazygit glow wl-clipboard tmux
-        kitty neovim bluez bluez-utils keyd
+        kitty neovim bluez bluez-utils keyd openssh github-cli
         eza zoxide btop fastfetch tldr man-db less plocate pacman-contrib
 
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
@@ -483,6 +483,12 @@ setup_hyprland() {
     sudo install -Dm644 -t /etc/sddm.conf.d "$SCRIPT_DIR/sddm/10-theme.conf" "$SCRIPT_DIR/sddm/10-wayland.conf"
     sudo rm -f /etc/X11/xorg.conf.d/10-amdgpu-primary.conf
     sudo systemctl enable sddm.service
+    # The theme has only a password box, so preselect this user and the uwsm session
+    if ! sudo test -f /var/lib/sddm/state.conf; then
+        printf '[Last]\nUser=%s\nSession=/usr/share/wayland-sessions/hyprland-uwsm.desktop\n' "$USER" \
+            | sudo install -Dm644 -o sddm -g sddm /dev/stdin /var/lib/sddm/state.conf
+        ok "SDDM preselects $USER"
+    fi
 }
 
 # 12. Claude Code

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Waybar module: Claude Code and Codex usage limits, like Omarchy's agents widget.
 
-The data comes from Omarchy's collectors (bin/omarchy-agent-usage-claude and
--codex, MIT, copied from github.com/omacom/omarchy), which use each CLI's own
+The data comes from Omarchy's collectors (bin/jmpd-agent-usage-claude and
+-codex: omarchy-agent-usage-*, MIT, copied from github.com/omacom/omarchy), which use each CLI's own
 sign-in. Shows an icon, plus the highest percentage once a limit passes 80%;
 the tooltip lists every limit and when it resets. An agent that isn't
 installed or signed in is left out.
@@ -31,7 +31,7 @@ def collect(agent):
     # waybar's PATH lacks ~/.local/bin, where the claude and codex installers put the CLIs
     env = {**os.environ, "PATH": f"{BIN}:{os.environ.get('PATH', '')}"}
     try:
-        out = subprocess.run([str(BIN / f"omarchy-agent-usage-{agent}"), "--limits-only"],
+        out = subprocess.run([str(BIN / f"jmpd-agent-usage-{agent}"), "--limits-only"],
                              capture_output=True, text=True, timeout=60, env=env).stdout
         return json.loads(out)
     except Exception:

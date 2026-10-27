@@ -1,15 +1,15 @@
 ---
 name: arch-desktop
-description: How this laptop's Arch Linux + Hyprland desktop is built and changed (dotfiles in ~/dotfiles, github.com/josempd/dotfiles). Use for any change to the OS or desktop - keybindings, top bar, launcher, lock/idle/screensaver, login screen, boot splash, themes and wallpapers, keyd, services, packages - or when debugging them.
+description: How the Arch Linux + Hyprland laptop and desktop are built and changed (dotfiles in ~/code/dotfiles, github.com/josempd/dotfiles). Use for any change to the OS or desktop - keybindings, top bar, launcher, lock/idle/screensaver, login screen, boot splash, themes and wallpapers, keyd, services, packages - or when debugging them.
 ---
 
 # Arch + Hyprland desktop (as-18)
 
 Laptop: Arch Linux, Hyprland 0.56 (Lua config) started through uwsm, NVIDIA RTX 5070 dGPU + AMD Radeon 880M iGPU. The look is Omarchy 3.8 (waybar, hyprlock, square borders) rebuilt by hand; Omarchy itself is not installed and is only a reference (github.com/omacom/omarchy, branch `quattro`; tag `v3.8.4` for the waybar era).
 
-## Source of truth: ~/dotfiles (branch `arch`)
+## Source of truth: ~/code/dotfiles (branch `master`)
 
-Never edit only the live file. Change the file in `~/dotfiles`, copy it to its live location to test, then commit (plain message, no Co-Authored-By trailer) and push `master` to github.com/josempd/dotfiles. `local-setup.sh` must stay idempotent and reproduce everything on a fresh install, so add a step there for every new file or system change.
+Never edit only the live file. Change the file in `~/code/dotfiles`, copy it to its live location to test, then commit (plain message, no Co-Authored-By trailer) and push `master` to github.com/josempd/dotfiles. `local-setup.sh` must stay idempotent and reproduce everything on a fresh install, so add a step there for every new file or system change.
 
 | Repo path | Live location | Notes |
 |---|---|---|
@@ -18,6 +18,7 @@ Never edit only the live file. Change the file in `~/dotfiles`, copy it to its l
 | `waybar/config.jsonc`, `style.css` | `~/.config/waybar/` | `systemctl --user restart waybar` |
 | `wofi/config` | `~/.config/wofi/` | style.css is generated (see Themes) |
 | `bin/*` | `~/.local/bin/` | |
+| `kitty.conf`, `tmux.conf` | `~/.config/kitty/`, `~/.tmux.conf` | No `~/.XCompose`: the system table is used; a stale one with a broken include makes dead keys type nothing in kitty |
 | `systemd/*` | `~/.config/systemd/user/` | Only user units go here; the setup loop copies everything in it |
 | `systemd-dropins/UNIT.d/*.conf` | `~/.config/systemd/user/UNIT.d/` | Drop-ins for packaged user units; waybar gets PartOf=graphical-session.target and no start limit |
 | `system/*` | `/etc/...` (sudo) | e.g. networkd wait-online `--any` drop-in |
@@ -66,7 +67,7 @@ Option+arrows used to be word jumps; they were freed so Super+arrows reach Hyprl
 ## Desktop pieces
 
 - **Top bar**: waybar, adapted from Omarchy 3.8. Right side: tray expander, agent usage (`bin/jmpd-agent-usage`), Bluetooth (bluetui), network (impala; iwd + systemd-networkd), volume (wiremix), CPU (btop), battery (click = power menu). Each icon carries its own right margin (~17px).
-- **Agent usage**: `jmpd-agent-usage` runs Omarchy's collectors `omarchy-agent-usage-claude` and `-codex` (copied, MIT) with `--limits-only`; icon only, percentage appears above 80%; tooltip lists every limit. Claude and Codex CLIs are installed by their curl installers into `~/.local/bin`.
+- **Agent usage**: `jmpd-agent-usage` runs `jmpd-agent-usage-claude` and `-codex` (Omarchy's `omarchy-agent-usage-*` collectors, copied, MIT) with `--limits-only`; icon only, percentage appears above 80%; tooltip lists every limit. Claude and Codex CLIs are installed by their curl installers into `~/.local/bin`.
 - **Notifications**: mako (D-Bus activated, themed via the `mako.conf` template; dunst removed). **Volume/brightness popups**: swayosd (`systemd/swayosd.service`, keys call `swayosd-client`). **Clipboard history**: `systemd/cliphist.service` (`wl-paste --watch cliphist store`), picker `bin/jmpd-clipboard`. `paccache.timer` is enabled.
 - **Launcher / menus**: wofi (`--dmenu` for the power and theme menus).
 - **Idle**: hypridle. Screensaver after 15 min, always (`jmpd-screensaver-launch`: one fullscreen kitty per active monitor via `hyprctl dispatch "hl.dsp.exec_cmd(cmd, { monitor = ... })"`, shared class so any key closes all; running `tte` effects on the JMPD text (`hypr/screensaver.txt`); leaving it (key or focus loss) runs `loginctl lock-session` first, since a session lock hides every other window and the animation cannot play under hyprlock; tte via `uv tool install terminaltexteffects`). Lock (hyprlock) after 5 min only on battery, and before sleep. `ac-no-sleep` holds a logind *sleep* inhibitor on AC (not idle); `ac-no-sleep --on-ac` exits 0 on AC.
@@ -79,6 +80,12 @@ Option+arrows used to be word jumps; they were freed so Super+arrows reach Hyprl
 - **Web apps**: `applications/*.desktop` running `google-chrome-stable --app=URL --class=NAME`, icons in `applications/icons/` (from Omarchy) installed to `~/.local/share/icons/hicolor/512x512/apps`. WhatsApp is one.
 - **Lid**: logind ignores it (`system/logind-lid.conf` → `/etc/systemd/logind.conf.d/lid.conf`, applied with `systemctl kill -s HUP systemd-logind`); Hyprland `switch:on/off:Lid Switch` binds turn eDP-1 off/on with `hl.dsp.dpms`.
 - **Network**: systemd-networkd + iwd. `systemd-networkd-wait-online` is masked: docker pulls in network-online.target, so with no known wifi at boot graphical.target waited 2 min and uwsm refused to start Hyprland from SDDM. Nothing should block boot on the network.
+
+## Reinstall keeping @home
+
+Done on the desktop 2026-10-27. pacstrap `base linux linux-firmware amd-ucode btrfs-progs cryptsetup dosfstools efibootmgr openssh iwd git sudo neovim zsh`, then `local-setup.sh`. `linux.preset` needs `PRESETS=('default' 'fallback')` for the fallback UKI; run `sudo bootctl install` after first boot (it cannot write firmware entries from the chroot); `/boot` in fstab with `fmask=0077,dmask=0077`.
+
+Omarchy files left in ~ (from before the reinstall) point at `/usr/share/omarchy` and fail silently: the known ones were removed by hand; for new oddities, grep ~ for `omarchy` paths that no longer exist.
 
 ## Themes
 

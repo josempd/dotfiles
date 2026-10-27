@@ -610,7 +610,7 @@ def write_file_cache(files):
   try:
     write_json(file_cache_path(), {"schemaVersion": FILE_CACHE_SCHEMA, "zone": file_cache_zone(), "files": files})
   except Exception as exc:
-    print(f"omarchy-agent-usage-codex: could not write file cache ({exc})", file=sys.stderr)
+    print(f"jmpd-agent-usage-codex: could not write file cache ({exc})", file=sys.stderr)
 
 
 def reusable_record(cached_files, key, stat_result):
@@ -680,7 +680,7 @@ def write_cached_stats(cache_file, stats):
   try:
     write_json(cache_file, {"schemaVersion": 2, "scanDate": today, "stats": stats})
   except Exception as exc:
-    print(f"omarchy-agent-usage-codex: could not write usage cache ({exc})", file=sys.stderr)
+    print(f"jmpd-agent-usage-codex: could not write usage cache ({exc})", file=sys.stderr)
 
 
 def local_stats():
@@ -723,7 +723,7 @@ def cached_local_stats(max_age):
   try:
     return _cached_local_stats(max_age)
   except Exception as exc:
-    print(f"omarchy-agent-usage-codex: cache unavailable ({exc}); scanning directly", file=sys.stderr)
+    print(f"jmpd-agent-usage-codex: cache unavailable ({exc}); scanning directly", file=sys.stderr)
     stats, _ = run_local_scans(max_age)
     return stats
 
