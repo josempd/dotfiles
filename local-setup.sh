@@ -166,7 +166,7 @@ setup_packages() {
         ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji
 
         # Apps
-        nautilus sushi imv mpv evince obsidian telegram-desktop zed spotify-launcher
+        nautilus sushi imv mpv papers obsidian telegram-desktop discord zed spotify-launcher
 
         # Languages and runtimes (Node and Bun come from their own installers below)
         go pyenv uv python
@@ -554,11 +554,11 @@ setup_defaults() {
     if have xdg-mime; then
         local current
         current="$(xdg-mime query default application/pdf || true)"
-        if [[ "$current" == "org.gnome.Evince.desktop" ]]; then
-            skip "Evince already default PDF viewer"
+        if [[ "$current" == "org.gnome.Papers.desktop" ]]; then
+            skip "Papers already default PDF viewer"
         else
-            xdg-mime default org.gnome.Evince.desktop application/pdf
-            ok "Evince set as default PDF viewer"
+            xdg-mime default org.gnome.Papers.desktop application/pdf
+            ok "Papers set as default PDF viewer"
         fi
     fi
     if have xdg-settings && [[ "$(xdg-settings get default-web-browser)" != "brave-browser.desktop" ]]; then

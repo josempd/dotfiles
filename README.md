@@ -28,7 +28,7 @@ The script is idempotent — safe to re-run at any time. It will skip anything a
 10b. **Hyprland** — `hypr/hyprland.lua` (macOS-style shortcuts, paired with keyd), hypridle/hyprlock, the Omarchy 3.8-style waybar and wofi, the tte screensaver, and the first theme through `jmpd-theme`; enables waybar, hyprpaper and hypridle as user services. Also the SDDM login screen (Omarchy theme, Wayland greeter)
 11. **Claude Code** and **Codex** — official installers; `agents/skills/` is linked into `~/.claude/skills` and `~/.codex/skills`
 12. **AUR apps** — Brave (`brave-bin`), Slack (`slack-desktop`) and LastPass CLI (`lastpass-cli`) through yay
-13. **Default apps** — Evince as the default PDF viewer
+13. **Default apps** — Papers as the default PDF viewer
 14. **keyd** — macOS layout from `keyd-default.conf`: Left Alt is Cmd, Super is Option
 15. **Dotfiles** — `zshrc`, `p10k.zsh`, `gitconfig`, `tmux.conf`
 16. **Scripts and services** — `bin/` into `~/.local/bin` (agentdev, nvim-open, cursor, update-cursor, ac-no-sleep, claude-desktop-wayland, and the jmpd-* desktop scripts), `systemd/` user units (ac-no-sleep, daily Cursor update), `applications/nvim-remote.desktop`, and the `udev/` Bluetooth rule
