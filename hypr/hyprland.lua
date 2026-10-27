@@ -28,6 +28,23 @@ hl.monitor({
     position = "auto",
     scale    = "auto",
 })
+local tv     = "desc:Samsung Electric Company SAMSUNG 0x01000E00"
+local lenovo = "desc:Lenovo Group Limited R45w-30 UPP040ZY"
+
+-- Desk: Samsung 4K TV on the left (scale 2 = 1920x1080 logical), Lenovo 32:9 ultrawide
+-- at 165Hz to its right. The TV's 4K@60 sits at the HDMI 2.0 limit, so its link drops now and then.
+hl.monitor({
+    output   = tv,
+    mode     = "3840x2160@60",
+    position = "0x0",
+    scale    = 2,
+})
+hl.monitor({
+    output   = lenovo,
+    mode     = "5120x1440@165",
+    position = "1920x0",
+    scale    = 1,
+})
 
 
 ---------------------
@@ -173,6 +190,11 @@ hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "
 hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
+
+-- 1 on the TV, 2 on the Lenovo. When the TV's link drops, its workspace stays put instead of
+-- moving to the 32:9 screen (and back), which would make a fullscreen game re-pick its resolution.
+hl.workspace_rule({ workspace = "1", monitor = tv,     default = true })
+hl.workspace_rule({ workspace = "2", monitor = lenovo, default = true })
 
 -- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 -- "Smart gaps" / "No gaps when only"
