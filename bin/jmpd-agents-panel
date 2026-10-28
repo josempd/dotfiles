@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-"""AI agents panel: limits, balances and token stats per agent, under the top bar.
+#!/usr/bin/python3
+"""AI agents window: limits, balances and token stats per agent.
 
-Click the bar's agent icon to toggle it (running it again closes it); Esc or
-clicking elsewhere closes it too. Reads the records jmpd-agents-update writes to
+Opened from the bar's agent icon, like wiremix or impala; running it again
+focuses the open window, Esc closes it. Reads the records jmpd-agents-update writes to
 ~/.local/state/jmpd-agents/usage and refreshes them in the background. Colors
 come from ~/.config/jmpd-agents/panel.css, written by jmpd-theme.
 """
@@ -13,19 +13,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-# gtk4-layer-shell must load before libwayland, so Python needs it preloaded
-LIB = "/usr/lib/libgtk4-layer-shell.so"
-if LIB not in os.environ.get("LD_PRELOAD", ""):
-    os.environ["LD_PRELOAD"] = f"{LIB} {os.environ.get('LD_PRELOAD', '')}".strip()
-    os.execv(sys.executable, [sys.executable, *sys.argv])
-
-import gi  # noqa: E402
+import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
-gi.require_version("Gtk4LayerShell", "1.0")
-from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
-from gi.repository import Gtk4LayerShell as LayerShell  # noqa: E402
+from gi.repository import Gdk, Gio, Gtk  # noqa: E402
 
 HOME = Path.home()
 USAGE = Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state") / "jmpd-agents" / "usage"
@@ -86,26 +78,17 @@ def label(text, *classes, xalign=0.0, **kw):
 
 class Panel(Gtk.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app)
-        LayerShell.init_for_window(self)
-        LayerShell.set_namespace(self, "jmpd-agents")
-        LayerShell.set_layer(self, LayerShell.Layer.OVERLAY)
-        LayerShell.set_anchor(self, LayerShell.Edge.TOP, True)
-        LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, True)
-        LayerShell.set_margin(self, LayerShell.Edge.TOP, 6)
-        LayerShell.set_margin(self, LayerShell.Edge.RIGHT, 10)
-        LayerShell.set_keyboard_mode(self, LayerShell.KeyboardMode.ON_DEMAND)
+        super().__init__(application=app, title="Agents")
         self.add_css_class("panel")
-        self.set_default_size(380, -1)
+        self.set_default_size(480, 640)
 
         keys = Gtk.EventControllerKey()
         keys.connect("key-pressed", lambda _c, key, *_: key == Gdk.KEY_Escape and self.close())
         self.add_controller(keys)
-        self.connect("notify::is-active", lambda w, _p: w.is_active() or w.close())
 
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
         self.box.add_css_class("content")
-        self.set_child(self.box)
+        self.set_child(Gtk.ScrolledWindow(child=self.box, hscrollbar_policy=Gtk.PolicyType.NEVER))
         self.light = light_mode()
         self.render()
         self.refresh(force=False)
@@ -235,7 +218,6 @@ class Panel(Gtk.ApplicationWindow):
 class App(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="dev.jmpd.AgentsPanel", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
-        self.panel = None
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
@@ -246,13 +228,8 @@ class App(Gtk.Application):
                                                   Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def do_activate(self):
-        # A second launch (another click on the bar icon) closes the open panel
-        if self.panel:
-            self.panel.close()
-            return
-        self.panel = Panel(self)
-        self.panel.connect("close-request", lambda *_: GLib.idle_add(self.quit) and False)
-        self.panel.present()
+        # A second launch (another click on the bar icon) raises the open window
+        (self.get_active_window() or Panel(self)).present()
 
 
 if __name__ == "__main__":

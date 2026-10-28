@@ -158,7 +158,7 @@ setup_packages() {
         # Hyprland desktop: audio, lock/idle, bar, launcher, screenshots, media keys, fonts
         # (the session itself too, so a bare pacstrap install is enough to start from)
         hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
-        python-gobject gtk4-layer-shell
+        python-gobject
         wireplumber pipewire-pulse pipewire-alsa pipewire-jack
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr

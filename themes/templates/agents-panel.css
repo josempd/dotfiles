@@ -1,11 +1,9 @@
-/* Agents panel (jmpd-agents-panel), square like the bar and lockscreen. Colors from the current theme (jmpd-theme). */
+/* Agents window (jmpd-agents-panel); Hyprland draws the border. Colors from the current theme (jmpd-theme). */
 window.panel {
-  background: transparent;
+  background-color: {{ background }};
 }
 
 .content {
-  background-color: {{ background }};
-  border: 2px solid {{ accent }};
   padding: 16px 18px;
   font-family: 'JetBrainsMono Nerd Font';
   font-size: 13px;
