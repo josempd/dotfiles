@@ -128,7 +128,6 @@
     "exec": "~/.local/bin/jmpd-agent-usage",
     "return-type": "json",
     "interval": 300,
-    "tooltip": false,
     "on-click": "uwsm-app -- ~/.local/bin/jmpd-agents-panel"
   },
   "custom/mempressure": {
