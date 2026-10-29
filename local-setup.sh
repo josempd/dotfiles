@@ -159,7 +159,7 @@ setup_packages() {
         # (the session itself too, so a bare pacstrap install is enough to start from)
         hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
         python-gobject
-        wireplumber pipewire-pulse pipewire-alsa pipewire-jack
+        wireplumber pipewire-pulse pipewire-alsa pipewire-jack rtkit alsa-utils
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
         brightnessctl playerctl power-profiles-daemon ufw
@@ -251,6 +251,11 @@ setup_nvidia_desktop() {
     # Lenovo's HDMI audio as its own sink, next to the TV's (see the file)
     install_file "$SCRIPT_DIR/pipewire/10-nvidia-hdmi-lenovo.conf" \
         "$HOME/.config/pipewire/pipewire.conf.d/10-nvidia-hdmi-lenovo.conf"
+    # The card itself only offers the TV profile, so the two can never claim the same PCM
+    install_file "$SCRIPT_DIR/pipewire/nvidia-hdmi-tv.profile-set.conf" \
+        "$HOME/.config/alsa-card-profile/mixer/profile-sets/nvidia-hdmi-tv.conf"
+    install_file "$SCRIPT_DIR/pipewire/nvidia-hdmi-tv-profile.wireplumber.conf" \
+        "$HOME/.config/wireplumber/wireplumber.conf.d/nvidia-hdmi-tv-profile.conf"
 
     # Rebuild the initramfs/UKIs only if one of these changed
     local rebuild=0 src dest
