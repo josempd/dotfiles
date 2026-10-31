@@ -251,6 +251,8 @@ setup_nvidia_desktop() {
     # Lenovo's HDMI audio as its own sink, next to the TV's (see the file)
     install_file "$SCRIPT_DIR/pipewire/10-nvidia-hdmi-lenovo.conf" \
         "$HOME/.config/pipewire/pipewire.conf.d/10-nvidia-hdmi-lenovo.conf"
+    install_file "$SCRIPT_DIR/pipewire/lenovo-iec958.pipewire-service.conf" \
+        "$HOME/.config/systemd/user/pipewire.service.d/lenovo-iec958.conf"
     # The card itself only offers the TV profile, so the two can never claim the same PCM
     install_file "$SCRIPT_DIR/pipewire/nvidia-hdmi-tv.profile-set.conf" \
         "$HOME/.config/alsa-card-profile/mixer/profile-sets/nvidia-hdmi-tv.conf"

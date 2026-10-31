@@ -58,6 +58,7 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 | Super+Shift+Space | Next wallpaper of the theme |
 | Super+Ctrl+Shift+Space | Theme menu (wofi with preview thumbnails, cached in `~/.cache/jmpd-theme/previews`) |
 | Super+Ctrl+V | Clipboard history (cliphist + wofi) |
+| Super+Ctrl+B / A / W / T | Bluetooth (bluetui) / audio (wiremix) / wifi (impala) / performance (btop), same as the bar icons |
 | Cmd+Shift+3 / 4 | Screenshot screen / area, copied |
 | Print, Cmd+Shift+5 | Area into satty, like flameshot: Enter copies and closes, Ctrl+S saves |
 | Cmd+arrows | Line start/end, document top/bottom; Option+Backspace deletes a word |
