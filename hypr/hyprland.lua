@@ -346,6 +346,10 @@ hl.bind(mainMod .. " + space",   hl.dsp.exec_cmd(menu))                       --
 hl.bind(mainMod .. " + SHIFT + space",        hl.dsp.exec_cmd("~/.local/bin/jmpd-theme bg-next"))  -- next wallpaper
 hl.bind(mainMod .. " + CTRL + V",             hl.dsp.exec_cmd("pkill -x wofi || ~/.local/bin/jmpd-clipboard"))  -- clipboard history
 hl.bind(mainMod .. " + CTRL + SHIFT + space", hl.dsp.exec_cmd("pkill -x wofi || ~/.local/bin/jmpd-theme"))  -- theme menu
+hl.bind(mainMod .. " + CTRL + B",             hl.dsp.exec_cmd(terminal .. " -e bluetui"))  -- bluetooth, as in the bar
+hl.bind(mainMod .. " + CTRL + A",             hl.dsp.exec_cmd(terminal .. " -e wiremix"))  -- audio
+hl.bind(mainMod .. " + CTRL + W",             hl.dsp.exec_cmd(terminal .. " -e impala"))   -- wifi
+hl.bind(mainMod .. " + CTRL + T",             hl.dsp.exec_cmd(terminal .. " -e btop"))     -- performance
 hl.bind("CTRL + SUPER + Tab",    hl.dsp.window.cycle_next())                  -- Cmd+Tab
 hl.bind("CTRL + SUPER + M",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+M
 hl.bind("CTRL + SUPER + H",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+H
