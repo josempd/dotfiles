@@ -1,7 +1,6 @@
 -- Options for editing while Claude Code agents change files from another pane.
 
--- Reload buffers changed on disk. FocusGained never fires while the agent edits
--- from another tmux pane, so also poll once a second.
+-- Reload buffers changed on disk; polled each second, since FocusGained never fires for another pane
 vim.o.autoread = true
 local reload_timer = vim.uv.new_timer()
 reload_timer:start(
@@ -12,9 +11,7 @@ reload_timer:start(
   end)
 )
 
--- Open the neo-tree file tree on startup: focused when no file is given, beside
--- the file otherwise. Skipped when nvim is a throwaway editor (commit messages,
--- stdin, diff mode, temp files such as Claude's Ctrl+G prompt).
+-- neo-tree on startup (beside the file if one is given), except for throwaway edits: commits, stdin, diffs, temp files
 vim.api.nvim_create_autocmd('StdinReadPre', { callback = function() vim.g.started_with_stdin = true end })
 vim.api.nvim_create_autocmd('VimEnter', {
   desc = 'Open neo-tree on startup',
@@ -46,8 +43,7 @@ vim.keymap.set('n', '<C-LeftMouse>', function()
   end
 end, { desc = 'Open URL / go to definition under mouse' })
 
--- Listen on a per-project socket so external tools (kitty hints, xdg-open,
--- Claude's Ctrl+click on paths) can open files in this instance via `nvim-open`.
+-- Per-project socket, so nvim-open (kitty hints, xdg-open, Claude's Ctrl+click) opens files here
 if vim.v.servername == '' or not vim.v.servername:match '/tmp/nvim%-' then
   local project = vim.fn.fnamemodify(vim.fn.getcwd(), ':t'):gsub('[^%w_.-]', '_')
   local sock = '/tmp/nvim-' .. project .. '.sock'

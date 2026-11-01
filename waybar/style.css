@@ -32,27 +32,16 @@
 }
 
 /* Same gap as between the other right-side icons */
-#custom-agents {
-  margin-right: 17px;
-}
-
-#custom-agents.warning {
-  color: @warning;
-}
-
-#custom-agents.critical {
-  color: @critical;
-}
-
+#custom-agents,
 #custom-mempressure {
   margin-right: 17px;
 }
 
-#custom-mempressure.warning {
+.warning {
   color: @warning;
 }
 
-#custom-mempressure.critical {
+.critical {
   color: @critical;
 }
 

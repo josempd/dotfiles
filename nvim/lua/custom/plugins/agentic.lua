@@ -1,11 +1,8 @@
 -- Plugins for working alongside Claude Code agents running in another tmux pane.
 
----@module 'lazy'
----@type LazySpec
 return {
   {
-    -- Claude Code IDE protocol: proposed edits open as nvim diffs, selections are shared.
-    -- Claude runs in its own tmux pane; connect it with `/ide` there.
+    -- Claude Code IDE protocol (connect with /ide in Claude's pane): edits open as diffs, selections shared
     'coder/claudecode.nvim',
     dependencies = { 'folke/snacks.nvim' },
     lazy = false,
