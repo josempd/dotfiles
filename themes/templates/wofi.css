@@ -27,8 +27,9 @@ window {
   padding: 4px 8px;
 }
 
+/* Inset like the input; some themes make selection the same color as the surface */
 #entry:selected {
-  background-color: {{ selection }};
+  background-color: {{ background }};
   outline: none;
 }
 
