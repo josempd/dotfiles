@@ -43,14 +43,14 @@
   },
   "custom/launcher": {
     "format": "",
-    "on-click": "pkill -x wofi || wofi",
-    "on-click-right": "kitty",
+    "on-click": "pkill -x wofi || uwsm-app -- wofi",
+    "on-click-right": "uwsm-app -- kitty",
     "tooltip-format": "Launcher\n\nCmd + Space"
   },
   "cpu": {
     "interval": 5,
     "format": "󰍛",
-    "on-click": "kitty -e btop"
+    "on-click": "uwsm-app -- kitty -e btop"
   },
   "clock": {
     "format": "{:L%A %H:%M}",
@@ -68,7 +68,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "kitty -e impala"
+    "on-click": "uwsm-app -- kitty -e impala"
   },
   "bluetooth": {
     "format": "",
@@ -77,11 +77,11 @@
     "format-connected": "󰂱",
     "format-no-controller": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "kitty -e bluetui"
+    "on-click": "uwsm-app -- kitty -e bluetui"
   },
   "pulseaudio": {
     "format": "{icon}",
-    "on-click": "kitty -e wiremix",
+    "on-click": "uwsm-app -- kitty -e wiremix",
     "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "tooltip-format": "Playing at {volume}%",
     "scroll-step": 5,
@@ -105,16 +105,16 @@
     "tooltip": false
   },
   "custom/agents": {
-    "exec": "~/.local/bin/jmpd-agent-usage",
+    "exec": "jmpd-agents waybar",
     "return-type": "json",
     "interval": 300,
-    "on-click": "uwsm-app -- ~/.local/bin/jmpd-agents-panel"
+    "on-click": "uwsm-app -- jmpd-agents panel"
   },
   "custom/mempressure": {
-    "exec": "~/.local/bin/jmpd-mem-pressure --waybar",
+    "exec": "jmpd-mem-pressure --waybar",
     "return-type": "json",
     "interval": 3,
-    "on-click": "uwsm-app -- kitty btop"
+    "on-click": "uwsm-app -- kitty -e btop"
   },
   "tray": {
     "icon-size": 12,

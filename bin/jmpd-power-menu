@@ -12,7 +12,7 @@ choice=$(printf '%s\n' \
 
 case "$choice" in
   *Lock) loginctl lock-session ;;
-  *Screensaver) ~/.local/bin/jmpd-screensaver-launch ;;
+  *Screensaver) jmpd-screensaver-launch ;;
   *Suspend) systemctl suspend ;;
   *"Log out") uwsm stop ;;
   *Reboot) systemctl reboot ;;

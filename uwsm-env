@@ -1,8 +1,8 @@
 # Session environment, read by uwsm at login (~/.config/uwsm/env)
 # Qt apps (polkit dialog, etc.) take colors and icons from qt6ct, written by jmpd-theme
 export QT_QPA_PLATFORMTHEME=qt6ct
-# mise shims so GUI-launched apps see the same node/python as the shell
-export PATH="$HOME/.local/share/mise/shims:$PATH"
+# Own scripts and mise shims, for the compositor, its apps and every user service
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 # The RTX 3090 drives every screen, so VA-API, GLX and the NVDEC backend use its driver
 export NVD_BACKEND=direct
 export LIBVA_DRIVER_NAME=nvidia

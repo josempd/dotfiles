@@ -1,16 +1,18 @@
 #!/usr/bin/python3
-"""AI agents window: limits, balances and token stats per agent.
+"""AI agent usage: records, the waybar icon and the panel window.
 
-Opened from the bar's agent icon, like wiremix or impala; running it again
-focuses the open window, Esc closes it. Reads the records jmpd-agents-update writes to
-~/.local/state/jmpd-agents/usage and refreshes them in the background. Colors
-come from ~/.config/jmpd-agents/panel.css, written by jmpd-theme.
+  jmpd-agents update [--force] [--limits-only]   run Omarchy's vendored collectors, write the records
+  jmpd-agents waybar                              refresh limits, print the bar module's JSON
+  jmpd-agents panel                               open the window (or raise it); Esc closes it
 """
 import datetime as dt
 import json
 import os
 import subprocess
 import sys
+import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import gi
@@ -20,10 +22,16 @@ gi.require_version("Gdk", "4.0")
 from gi.repository import Gdk, Gio, Gtk  # noqa: E402
 
 HOME = Path.home()
-USAGE = Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state") / "jmpd-agents" / "usage"
-ASSETS = HOME / ".local/share/jmpd-agents/shell/plugins/agents/assets"
+VENDOR = HOME / ".local/share/jmpd-agents"
+USAGE = HOME / ".local/state/jmpd-agents/usage"
+ASSETS = VENDOR / "shell/plugins/agents/assets"
 CSS = HOME / ".config/jmpd-agents/panel.css"
-UPDATE = HOME / ".local/bin/jmpd-agents-update"
+PREFIX = "omarchy-agent-usage-"
+ROBOT = "\U000F06A9"  # nf-md-robot
+
+
+def level(pct):
+    return "critical" if pct >= 0.95 else "warning" if pct >= 0.8 else "normal"
 
 
 def until(iso):
@@ -63,6 +71,50 @@ def records():
     return sorted(found, key=lambda r: (not r.get("limits"), -sum(d.get("messageCount", 0) for d in r.get("recentDays", []))))
 
 
+def collect(path, flags, env):
+    agent = path.name.removeprefix(PREFIX)
+    try:
+        out = subprocess.run([sys.executable, str(path), *flags], capture_output=True, text=True,
+                             timeout=120, env=env).stdout
+        record = json.loads(out)
+    except (subprocess.TimeoutExpired, json.JSONDecodeError):
+        print(f"jmpd-agents: {agent} collector failed", file=sys.stderr)
+        return False
+    with tempfile.NamedTemporaryFile("w", dir=USAGE, prefix=f".{agent}.", delete=False) as tmp:
+        json.dump(record, tmp)
+    os.replace(tmp.name, USAGE / f"{agent}.json")
+    return True
+
+
+def update(flags):
+    USAGE.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, "OMARCHY_PATH": str(VENDOR), "OMARCHY_AGENT_USAGE_REFRESH_AT": f"{time.time():.6f}"}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        return all(pool.map(lambda p: collect(p, flags, env), sorted((VENDOR / "bin").glob(PREFIX + "*"))))
+
+
+def waybar():
+    update(["--limits-only"])
+    sections, percents = [], []
+    for r in records():
+        if not r.get("limits"):
+            continue
+        name = r.get("name", r.get("id", ""))
+        lines = [f"{name} · {plan(r)}" if plan(r) else name]
+        for limit in r["limits"]:
+            reset = f" · resets in {until(limit['resetsAt'])}" if limit.get("resetsAt") else ""
+            lines.append(f"  {limit['label']}: {round(limit['percent'] * 100)}%{reset}")
+            percents.append(limit["percent"])
+        sections.append("\n".join(lines))
+    if not sections:
+        print(json.dumps({"text": ROBOT, "tooltip": "No agent usage available", "class": "stale"}))
+        return
+    worst = max(percents)
+    # Just the icon; the percentage only shows up once a limit gets close
+    text = f"{ROBOT} {round(worst * 100)}%" if worst >= 0.8 else ROBOT
+    print(json.dumps({"text": text, "tooltip": "\n\n".join(sections), "class": level(worst)}))
+
+
 def light_mode():
     out = subprocess.run(["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
                          capture_output=True, text=True).stdout
@@ -95,7 +147,7 @@ class Panel(Gtk.ApplicationWindow):
 
     def refresh(self, force):
         self.status.set_text("Refreshing…")
-        argv = [str(UPDATE)] + (["--force"] if force else [])
+        argv = [__file__, "update"] + (["--force"] if force else [])
         proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE)
         proc.wait_async(None, lambda *_: self.get_visible() and self.render())
 
@@ -157,7 +209,7 @@ class Panel(Gtk.ApplicationWindow):
                 img = Gtk.Image.new_from_file(str(ASSETS / name))
                 img.set_pixel_size(20)
                 return img
-        return label("\U000F06A9", "glyph")  # nf-md-robot
+        return label(ROBOT, "glyph")
 
     def section(self, r):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -209,7 +261,7 @@ class Panel(Gtk.ApplicationWindow):
         line.append(label(f"{round(pct * 100)}%" + (f" · resets in {reset}" if reset else ""), "muted"))
         row.append(line)
         bar = Gtk.ProgressBar(fraction=pct)
-        bar.add_css_class("critical" if pct >= 0.95 else "warning" if pct >= 0.8 else "normal")
+        bar.add_css_class(level(pct))
         bar.set_tooltip_text(limit.get("label", ""))
         row.append(bar)
         return row
@@ -232,5 +284,17 @@ class App(Gtk.Application):
         (self.get_active_window() or Panel(self)).present()
 
 
+def main():
+    cmd, *args = sys.argv[1:] or ["panel"]
+    if cmd == "update":
+        sys.exit(0 if update([a for a in args if a in ("--force", "--limits-only")]) else 1)
+    elif cmd == "waybar":
+        waybar()
+    elif cmd == "panel":
+        sys.exit(App().run(None))
+    else:
+        sys.exit(__doc__)
+
+
 if __name__ == "__main__":
-    sys.exit(App().run(None))
+    main()

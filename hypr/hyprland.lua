@@ -79,7 +79,7 @@ local menu        = "pkill -x wofi || uwsm-app -- wofi"
 hl.on("hyprland.start", function ()
     hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
     -- Fullscreen XWayland games go to the TV at 4K, not the ultrawide XWayland picked as primary
-    hl.exec_cmd(os.getenv("HOME") .. "/.local/bin/jmpd-xwayland-primary '" .. tv:sub(6) .. "'")
+    hl.exec_cmd("jmpd-xwayland-primary '" .. tv:sub(6) .. "'")
 end)
 
 
@@ -305,7 +305,7 @@ hl.device({
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("pkill -x wofi || ~/.local/bin/jmpd-power-menu"))
+hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("pkill -x wofi || jmpd-power-menu"))
 hl.bind(mainMod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"))  -- log out; uwsm stops the session's services first
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
@@ -331,9 +331,9 @@ hl.bind("ALT + F4",              hl.dsp.window.close())                       --
 hl.bind(mainMod .. " + Q",       hl.dsp.window.close())                       -- Super+Q
 hl.bind("CTRL + SUPER + space",  hl.dsp.exec_cmd(menu))                       -- Cmd+Space
 hl.bind(mainMod .. " + space",   hl.dsp.exec_cmd(menu))                       -- Super+Space, as in Omarchy
-hl.bind(mainMod .. " + SHIFT + space",        hl.dsp.exec_cmd("~/.local/bin/jmpd-theme bg-next"))  -- next wallpaper
-hl.bind(mainMod .. " + CTRL + V",             hl.dsp.exec_cmd("pkill -x wofi || ~/.local/bin/jmpd-clipboard"))  -- clipboard history
-hl.bind(mainMod .. " + CTRL + SHIFT + space", hl.dsp.exec_cmd("pkill -x wofi || ~/.local/bin/jmpd-theme"))  -- theme menu
+hl.bind(mainMod .. " + SHIFT + space",        hl.dsp.exec_cmd("jmpd-theme bg-next"))  -- next wallpaper
+hl.bind(mainMod .. " + CTRL + V",             hl.dsp.exec_cmd("pkill -x wofi || jmpd-clipboard"))  -- clipboard history
+hl.bind(mainMod .. " + CTRL + SHIFT + space", hl.dsp.exec_cmd("pkill -x wofi || jmpd-theme"))  -- theme menu
 hl.bind(mainMod .. " + CTRL + B",             hl.dsp.exec_cmd(terminal .. " -e bluetui"))  -- bluetooth, as in the bar
 hl.bind(mainMod .. " + CTRL + A",             hl.dsp.exec_cmd(terminal .. " -e wiremix"))  -- audio
 hl.bind(mainMod .. " + CTRL + W",             hl.dsp.exec_cmd(terminal .. " -e impala"))   -- wifi
@@ -341,7 +341,7 @@ hl.bind(mainMod .. " + CTRL + T",             hl.dsp.exec_cmd(terminal .. " -e b
 hl.bind("CTRL + SUPER + Tab",    hl.dsp.window.cycle_next())                  -- Cmd+Tab
 hl.bind("CTRL + SUPER + M",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+M
 hl.bind("CTRL + SUPER + H",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+H
-hl.bind("CTRL + SUPER + Q",      hl.dsp.exec_cmd("hyprlock"))                 -- Ctrl+Cmd+Q
+hl.bind("CTRL + SUPER + Q",      hl.dsp.exec_cmd("loginctl lock-session"))   -- Ctrl+Cmd+Q
 hl.bind("CTRL + SUPER + left",   hl.dsp.focus({ workspace = "e-1" }))         -- Ctrl+Left
 hl.bind("CTRL + SUPER + right",  hl.dsp.focus({ workspace = "e+1" }))         -- Ctrl+Right
 hl.bind("CTRL + SUPER + 3",      hl.dsp.exec_cmd(shots .. ' && grim "$f" && wl-copy < "$f"'))                  -- Cmd+Shift+3

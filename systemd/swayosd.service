@@ -1,5 +1,5 @@
 [Unit]
-Description=On-screen display for volume and brightness (swayosd)
+Description=On-screen display for volume (swayosd)
 PartOf=graphical-session.target
 After=graphical-session.target
 

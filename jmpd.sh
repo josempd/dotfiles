@@ -38,16 +38,16 @@ clone() { [[ -d $2 ]] || git clone -q --depth=1 "$1" "$2"; }
 
 PACKAGES=(
     # Base and shell
-    zsh git curl wget ca-certificates base-devel unzip xdg-utils shellcheck
-    ripgrep fd fzf jq bat git-delta lazygit glow wl-clipboard tmux
+    zsh git curl ca-certificates base-devel unzip xdg-utils shellcheck
+    ripgrep fd fzf jq lazygit wl-clipboard tmux
     kitty neovim bluez bluez-utils keyd openssh github-cli
-    eza zoxide btop fastfetch tldr man-db less plocate pacman-contrib
+    btop man-db less plocate pacman-contrib
 
     # Hyprland session, audio, lock/idle, bar, launcher, screenshots, fonts
     hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
     python-gobject ffmpeg
     wireplumber pipewire-pulse pipewire-alsa pipewire-jack rtkit alsa-utils
-    hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
+    hyprlock hypridle hyprpaper waybar wofi hyprsunset satty grim slurp
     impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
     playerctl power-profiles-daemon ufw
     gnome-keyring xdg-desktop-portal-gtk
@@ -58,10 +58,10 @@ PACKAGES=(
     lib32-nvidia-utils steam cuda cmake
 
     # Apps
-    nautilus sushi imv mpv papers obsidian telegram-desktop discord zed spotify-launcher
+    nautilus sushi mpv papers obsidian telegram-desktop discord zed spotify-launcher
 
     # Runtimes (node, python, pnpm, bun, pi come from mise)
-    go mise uv python
+    mise uv python
 
     # Containers, Kubernetes, cloud, VPN
     docker docker-buildx docker-compose
@@ -69,7 +69,7 @@ PACKAGES=(
     aws-cli-v2 terraform sshpass openfortivpn tailscale
 
     # AUR
-    brave-bin yaru-icon-theme hyprland-preview-share-picker-git slack-desktop lastpass-cli
+    brave-bin yaru-icon-theme hyprland-preview-share-picker-git slack-desktop lastpass-cli cursor-bin
 )
 
 FILES=(
@@ -79,6 +79,7 @@ FILES=(
     "tmux.conf $HOME/.tmux.conf"
     "kitty.conf $HOME/.config/kitty/kitty.conf"
     "brave-flags.conf $HOME/.config/brave-flags.conf"
+    "cursor-flags.conf $HOME/.config/cursor-flags.conf"
     "nvim $HOME/.config/nvim"
     "mise/global.toml $HOME/.config/mise/config.toml"
     "uv/uv.toml $HOME/.config/uv/uv.toml"
@@ -231,7 +232,6 @@ setup_desktop() {
     systemctl --user daemon-reload
     systemctl --user enable waybar.service hyprpaper.service hypridle.service swayosd.service \
         cliphist.service jmpd-mem-pressure.service
-    systemctl --user enable --now cursor-update.timer
 }
 
 setup_packages

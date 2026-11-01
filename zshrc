@@ -19,8 +19,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# If you come from bash you might have to change your $PATH.
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -172,11 +171,6 @@ if [[ -n "$TMUX" ]]; then
   add-zsh-hook preexec _cmdcap_preexec
   add-zsh-hook precmd  _cmdcap_precmd
 fi
-
-# ── worktrunk (git worktrees for parallel agents) ────────────────────────────
-# `wt` shell function lets `wt switch` cd; wtclean drops merged worktrees plus stale git metadata.
-if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
-wtclean() { wt step prune --foreground "$@" && git worktree prune -v; }
 
 # Machine-local config (work functions, secrets) — untracked, keep out of this repo.
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

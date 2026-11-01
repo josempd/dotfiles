@@ -46,5 +46,5 @@ args=(${line:++$line} "$target")
 if [[ -n "${TMUX:-}" ]]; then
   tmux new-window -n "$(basename "$target")" nvim "${args[@]}"
 else
-  "$(command -v kitty || echo "$HOME/.local/bin/kitty")" --detach nvim "${args[@]}"
+  kitty --detach nvim "${args[@]}"
 fi
