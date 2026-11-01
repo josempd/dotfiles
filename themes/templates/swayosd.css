@@ -6,7 +6,7 @@
 @define-color progress {{ accent }};
 
 window {
-  border-radius: 0;
+  border-radius: 8px;
   opacity: 0.97;
   border: 1px solid @border-color;
 
@@ -25,7 +25,7 @@ image {
 }
 
 progressbar {
-  border-radius: 0;
+  border-radius: 4px;
 }
 
 progress {

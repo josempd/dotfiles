@@ -1,13 +1,13 @@
-/* Square, raised a step above the windows with a hairline border; colors from the current theme (jmpd-theme) */
+/* Rounded like the windows (8px, 4px inside), raised a step with a hairline border; colors from the current theme (jmpd-theme) */
 * {
   font-family: 'JetBrainsMono Nerd Font';
   font-size: 14px;
-  border-radius: 0;
 }
 
 window {
   background-color: {{ lighter_background }};
   border: 1px solid {{ muted }};
+  border-radius: 8px;
 }
 
 #outer-box {
@@ -20,6 +20,7 @@ window {
   border: none;
   padding: 8px;
   margin-bottom: 8px;
+  border-radius: 4px;
   box-shadow: none;
 }
 
@@ -30,6 +31,7 @@ window {
 /* Inset like the input; some themes make selection the same color as the surface */
 #entry:selected {
   background-color: {{ background }};
+  border-radius: 4px;
   outline: none;
 }
 
