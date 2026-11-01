@@ -73,6 +73,15 @@
   margin-right: 18px;
 }
 
+/* Raised like the other popups */
 tooltip {
-  padding: 2px;
+  background-color: @surface;
+  border: 1px solid @hairline;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+tooltip * {
+  background-color: transparent;
+  text-shadow: none;
 }

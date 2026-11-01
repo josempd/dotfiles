@@ -2,3 +2,5 @@
 @define-color background {{ dark_background }};
 @define-color warning {{ yellow }};
 @define-color critical {{ red }};
+@define-color surface {{ lighter_background }};
+@define-color hairline {{ muted }};
