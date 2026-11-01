@@ -14,8 +14,7 @@
     "bluetooth",
     "network",
     "pulseaudio",
-    "cpu",
-    "battery"
+    "cpu"
   ],
   "hyprland/workspaces": {
     "on-click": "activate",
@@ -70,25 +69,6 @@
     "interval": 3,
     "spacing": 1,
     "on-click": "kitty -e impala"
-  },
-  "battery": {
-    "format": "{capacity}% {icon}",
-    "format-discharging": "{icon}",
-    "format-charging": "{icon}",
-    "format-plugged": "",
-    "format-icons": {
-      "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
-      "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
-    },
-    "format-full": "󰂅",
-    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
-    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
-    "interval": 5,
-    "on-click": "~/.local/bin/jmpd-power-menu",
-    "states": {
-      "warning": 20,
-      "critical": 10
-    }
   },
   "bluetooth": {
     "format": "",

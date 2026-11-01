@@ -162,7 +162,7 @@ setup_packages() {
         wireplumber pipewire-pulse pipewire-alsa pipewire-jack rtkit alsa-utils
         hyprlock hypridle hyprpaper waybar wofi hyprpicker hyprsunset satty grim slurp
         impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
-        brightnessctl playerctl power-profiles-daemon ufw
+        playerctl power-profiles-daemon ufw
         gnome-keyring xdg-desktop-portal-gtk
         ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra
 
@@ -185,17 +185,8 @@ setup_packages() {
     sudo systemctl enable --now bluetooth.service power-profiles-daemon.service
     # Weekly cleanup of old package downloads (pacman-contrib)
     sudo systemctl enable --now paccache.timer
-    # mako is the notification daemon; dunst would compete for the same D-Bus name
-    if pacman -Qq dunst &>/dev/null; then
-        sudo pacman -Rns --noconfirm dunst
-    fi
-
-    # Closing the lid does nothing (Hyprland only turns the screen off)
-    sudo install -Dm644 "$SCRIPT_DIR/system/logind-lid.conf" /etc/systemd/logind.conf.d/lid.conf
-
     # Memory, as in Omarchy: zram the size of RAM, reclaim tuned for it, and systemd-oomd killing
     # the worst app (app.slice and tmux panes, see systemd-dropins) before the kernel OOM killer
-    sudo rm -f /etc/systemd/system/user@.service.d/oomd.conf
     sudo install -Dm644 "$SCRIPT_DIR/system/zram-generator.conf" /etc/systemd/zram-generator.conf
     sudo install -Dm644 "$SCRIPT_DIR/system/sysctl-memory.conf" /etc/sysctl.d/99-jmpd-memory.conf
     sudo install -Dm644 "$SCRIPT_DIR/system/oomd.conf" /etc/systemd/oomd.conf.d/10-jmpd.conf
@@ -210,7 +201,6 @@ setup_packages() {
 
     # A laptop must not wait for the network to boot: docker pulls in network-online.target,
     # graphical.target waits for it, and uwsm won't start Hyprland until graphical.target is up
-    sudo rm -rf /etc/systemd/system/systemd-networkd-wait-online.service.d
     sudo systemctl mask systemd-networkd-wait-online.service
 
     # Firewall: block incoming, allow outgoing (Omarchy's default)
@@ -225,23 +215,9 @@ setup_packages() {
     fi
 }
 
-# NVIDIA is the only GPU (the RTX 3090 desktop). The laptop's NVIDIA sits next to the AMD iGPU
-# that drives its panel, so this is false there.
-nvidia_only() {
-    local d vendors=""
-    for d in /sys/bus/pci/devices/*; do
-        [[ $(<"$d/class") == 0x03* ]] && vendors+="$(<"$d/vendor") "
-    done
-    [[ -n "$vendors" && -z "${vendors//0x10de /}" ]]
-}
-
 # 1b. NVIDIA desktop: driver, early KMS, and the Samsung TV's EDID fix
 setup_nvidia_desktop() {
     info "Setting up NVIDIA desktop..."
-    if ! nvidia_only; then
-        skip "NVIDIA is not the only GPU"
-        return 0
-    fi
 
     # Open kernel modules (Turing and newer), built by DKMS for the stock kernel
     pkg_ensure linux-headers nvidia-open-dkms nvidia-utils egl-wayland libva-nvidia-driver
@@ -272,7 +248,7 @@ system/nvidia-modprobe.conf /etc/modprobe.d/nvidia.conf
 system/nvidia-mkinitcpio.conf /etc/mkinitcpio.conf.d/nvidia.conf
 EOF
 
-    # UKIs take the cmdline from /etc/kernel/cmdline if it exists, else /etc/cmdline.d/*.conf
+    # UKIs take the kernel cmdline from /etc/kernel/cmdline
     local params
     params="$(<"$SCRIPT_DIR/system/nvidia-cmdline.conf")"
     if [[ -f /etc/kernel/cmdline ]]; then
@@ -281,13 +257,6 @@ EOF
             ok "Added to /etc/kernel/cmdline: $params"
             rebuild=1
         fi
-    elif ! cmp -s "$SCRIPT_DIR/system/nvidia-cmdline.conf" /etc/cmdline.d/nvidia.conf; then
-        sudo install -Dm644 "$SCRIPT_DIR/system/nvidia-cmdline.conf" /etc/cmdline.d/nvidia.conf
-        ok "Installed: /etc/cmdline.d/nvidia.conf"
-        rebuild=1
-    fi
-    if ! grep -qs '^default_uki' /etc/mkinitcpio.d/linux.preset; then
-        warn "Not booting UKIs: add to the bootloader's kernel cmdline by hand: $params"
     fi
 
     if (( rebuild )); then
@@ -311,10 +280,6 @@ setup_steam() {
 # 1d. Local LLM on the RTX 3090: CUDA and llama.cpp (pinned, built with CUDA); the models are fetched by hand
 setup_llama_server() {
     info "Setting up llama-server..."
-    if ! nvidia_only; then
-        skip "Not the NVIDIA desktop"
-        return 0
-    fi
     pkg_ensure cuda cmake
     # The tested version; move it when upgrading on purpose
     local ref=4f37f519722aa3242eecb7649466b4a4a2d6d6da
@@ -461,7 +426,6 @@ setup_hyprland() {
     sudo install -Dm644 -t /usr/share/sddm/themes/omarchy "$SCRIPT_DIR"/sddm/omarchy/*
     sudo install -Dm644 "$SCRIPT_DIR/sddm/hyprland.lua" /usr/share/sddm/hyprland.lua
     sudo install -Dm644 -t /etc/sddm.conf.d "$SCRIPT_DIR/sddm/10-theme.conf" "$SCRIPT_DIR/sddm/10-wayland.conf"
-    sudo rm -f /etc/X11/xorg.conf.d/10-amdgpu-primary.conf
     sudo systemctl enable sddm.service
     # The theme has only a password box, so preselect this user and the uwsm session
     if ! sudo test -f /var/lib/sddm/state.conf; then
@@ -588,7 +552,7 @@ setup_configs() {
     done
 }
 
-# 17. Personal scripts, user services, desktop entries, udev rules
+# 17. Personal scripts, user services, desktop entries
 setup_scripts() {
     info "Setting up personal scripts and services..."
     local f
@@ -615,21 +579,11 @@ setup_scripts() {
         install_file "$f" "$HOME/.config/systemd/user/$(basename "$(dirname "$f")")/$(basename "$f")"
     done
     systemctl --user daemon-reload
-    systemctl --user enable --now ac-no-sleep.service cursor-update.timer
-    # Volume/brightness popups and clipboard history, inside the Hyprland session
+    systemctl --user enable --now cursor-update.timer
+    # Volume popups and clipboard history, inside the Hyprland session
     systemctl --user enable swayosd.service cliphist.service
     # Memory pressure warnings (notification + waybar), see bin/jmpd-mem-pressure
     systemctl --user enable jmpd-mem-pressure.service
-
-    for f in "$SCRIPT_DIR"/udev/*.rules; do
-        if [[ -f "/etc/udev/rules.d/$(basename "$f")" ]] && cmp -s "$f" "/etc/udev/rules.d/$(basename "$f")"; then
-            skip "Already up to date: /etc/udev/rules.d/$(basename "$f")"
-        else
-            sudo cp "$f" /etc/udev/rules.d/
-            ok "Installed: /etc/udev/rules.d/$(basename "$f")"
-        fi
-    done
-    sudo udevadm control --reload-rules
 }
 
 # ─── Main ─────────────────────────────────────────────────────────────────────

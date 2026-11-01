@@ -92,18 +92,6 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
--- NVIDIA as the only GPU (the RTX 3090 desktop): it drives the screens, so VA-API and GLX use its
--- driver too. Not on the laptop, where the panel is on the AMD iGPU and forcing these gives
--- Chromium (Brave) black video. Same test as nvidia_only in jmpd.sh.
-local gpus = io.popen([[for d in /sys/bus/pci/devices/*; do
-    case "$(cat "$d/class")" in 0x03*) cat "$d/vendor" ;; esac
-done | sort -u]])
-if gpus and gpus:read("a") == "0x10de\n" then
-    hl.env("NVD_BACKEND", "direct")
-    hl.env("LIBVA_DRIVER_NAME", "nvidia")
-    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-end
-if gpus then gpus:close() end
 
 
 -----------------------
@@ -384,19 +372,13 @@ hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Laptop multimedia keys for volume and LCD brightness, with swayosd's on-screen level
+-- Media keys for volume, with swayosd's on-screen level
 local osd = "swayosd-client --monitor \"$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')\" "
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(osd .. "--output-volume raise"),       { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(osd .. "--output-volume lower"),       { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd(osd .. "--output-volume mute-toggle"), { locked = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd(osd .. "--input-volume mute-toggle"),  { locked = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd(osd .. "--brightness raise"),          { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd(osd .. "--brightness lower"),          { locked = true, repeating = true })
 
--- Lid closed: keep everything running, just turn the internal screen off
--- (logind ignores the lid, see system/logind-lid.conf)
-hl.bind("switch:on:Lid Switch",  hl.dsp.dpms({ action = "disable", monitor = "eDP-1" }), { locked = true })
-hl.bind("switch:off:Lid Switch", hl.dsp.dpms({ action = "enable",  monitor = "eDP-1" }), { locked = true })
 
 -- Requires playerctl
 hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })

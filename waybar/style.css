@@ -61,7 +61,6 @@
 }
 
 #cpu,
-#battery,
 #pulseaudio,
 #custom-launcher {
   min-width: 12px;
@@ -86,12 +85,4 @@
 
 tooltip {
   padding: 2px;
-}
-
-#battery.warning {
-  color: @warning;
-}
-
-#battery.critical {
-  color: @critical;
 }
