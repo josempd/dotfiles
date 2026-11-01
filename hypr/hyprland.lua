@@ -19,17 +19,17 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("jmpd-xwayland-primary '" .. tv:sub(6) .. "'")
 end)
 
--- Border colors come from the current theme (jmpd-theme writes theme.lua); the fallback keeps a fresh session starting
+-- Border and shadow colors come from the current theme (jmpd-theme writes theme.lua); the fallback keeps a fresh session starting
 local ok, theme = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/theme.lua")
 if not ok then
-    theme = { active_border = "rgb(89b4fa)", inactive_border = "rgba(595959aa)" }
+    theme = { active_border = "rgb(595959)", inactive_border = "rgb(303030)", shadow = "rgba(000000a0)", shadow_inactive = "rgba(00000050)" }
 end
 
 hl.config({
     general = {
-        gaps_in          = 5,
-        gaps_out         = 10,
-        border_size      = 2,
+        gaps_in          = 8,
+        gaps_out         = 16,
+        border_size      = 1,
         resize_on_border = true,
         col = {
             active_border   = theme.active_border,
@@ -38,7 +38,15 @@ hl.config({
     },
     decoration = {
         rounding = 0,
-        shadow   = { enabled = false },
+        -- Focus reads as elevation: a deep shadow on the active window, a faint one elsewhere
+        shadow   = {
+            enabled        = true,
+            range          = 24,
+            render_power   = 3,
+            offset         = { 0, 4 },
+            color          = theme.shadow,
+            color_inactive = theme.shadow_inactive,
+        },
         blur     = { enabled = false },
     },
     dwindle = {
