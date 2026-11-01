@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # MVI checks (rules in agents/skills/arch-desktop/SKILL.md): prints each violation, exits 1 if any
 set -uo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
+cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || exit 1
 
 fail=0
 bad() { printf '\033[1;31mFAIL\033[0m %s\n' "$*"; fail=1; }
