@@ -3,14 +3,13 @@
 # captures. Interactive shells only, and not when already inside tmux.
 # Reattaches a detached session if one exists, else starts a new one
 # (so a second kitty window gets its own session instead of mirroring).
-if [[ $- == *i* ]] && [[ -z "$TMUX" ]] && command -v tmux &>/dev/null; then
+# exec replaces this shell, so one `exit` closes the window; NO_TMUX=1 skips it.
+if [[ $- == *i* ]] && [[ -z "$TMUX" ]] && [[ -z "$NO_TMUX" ]] && command -v tmux &>/dev/null; then
   __tmux_free=$(tmux list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null | awk '$1=="0"{print $2; exit}')
   if [[ -n "$__tmux_free" ]]; then
-    tmux attach -t "$__tmux_free"
-  else
-    tmux new-session
+    exec tmux attach -t "$__tmux_free"
   fi
-  unset __tmux_free
+  exec tmux new-session
 fi
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
