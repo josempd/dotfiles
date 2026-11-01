@@ -19,7 +19,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
-from gi.repository import Gdk, Gio, Gtk  # noqa: E402
+from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
 HOME = Path.home()
 VENDOR = HOME / ".local/share/jmpd-agents"
@@ -144,6 +144,7 @@ class Panel(Gtk.ApplicationWindow):
         self.light = light_mode()
         self.render()
         self.refresh(force=False)
+        GLib.timeout_add_seconds(60, lambda: self.refresh(force=False) or True)
 
     def refresh(self, force):
         self.status.set_text("Refreshing…")
@@ -281,7 +282,9 @@ class App(Gtk.Application):
 
     def do_activate(self):
         # A second launch (another click on the bar icon) raises the open window
-        (self.get_active_window() or Panel(self)).present()
+        if win := self.get_active_window():
+            win.refresh(force=False)
+        (win or Panel(self)).present()
 
 
 def main():
