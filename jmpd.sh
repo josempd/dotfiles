@@ -79,6 +79,7 @@ FILES=(
     "tmux.conf $HOME/.tmux.conf"
     "kitty.conf $HOME/.config/kitty/kitty.conf"
     "fontconfig $HOME/.config/fontconfig"
+    "btop/btop.conf $HOME/.config/btop/btop.conf"
     "brave-flags.conf $HOME/.config/brave-flags.conf"
     "cursor-flags.conf $HOME/.config/cursor-flags.conf"
     "nvim $HOME/.config/nvim"

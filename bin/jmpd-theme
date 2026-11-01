@@ -40,6 +40,7 @@ TARGETS = {
     "qt6ct-colors.conf": HOME / ".config/qt6ct/colors/jmpd.conf",
     "share-picker.css": HOME / ".config/hyprland-preview-share-picker/theme.css",
     "agents-panel.css": HOME / ".config/jmpd-agents/panel.css",
+    "btop.theme": HOME / ".config/btop/themes/current.theme",
 }
 # Also rendered to GTK 4's settings.ini
 EXTRA_TARGETS = {"gtk-settings.ini": [HOME / ".config/gtk-4.0/settings.ini"]}
@@ -145,6 +146,7 @@ def reload():
     subprocess.run(["hyprctl", "reload"], **quiet)
     subprocess.run(["systemctl", "--user", "restart", "waybar.service", "hyprpaper.service"], **quiet)
     subprocess.run(["pkill", "-USR1", "-x", "kitty"], **quiet)  # kitty rereads its config
+    subprocess.run(["pkill", "-USR2", "-x", "btop"], **quiet)  # so does btop
     subprocess.run(["makoctl", "reload"], **quiet)
     subprocess.run(["systemctl", "--user", "try-restart", "swayosd.service"], **quiet)
 
