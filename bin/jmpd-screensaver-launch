@@ -3,8 +3,7 @@
 pgrep -f -- '--class=jmpd\.screensaver' >/dev/null && exit 0
 pidof hyprlock >/dev/null && exit 0
 
-# One window per monitor. They share the class, so focus moving between them doesn't
-# count as losing focus, and any key in one closes them all (see jmpd-screensaver)
+# One window per monitor, sharing a class: moving focus between them isn't focus loss, any key closes all
 cmd="kitty --class=jmpd.screensaver --override font_size=18 --override window_padding_width=0 -e jmpd-screensaver"
 for monitor in $(hyprctl monitors -j | jq -r '.[] | select(.dpmsStatus) | .name'); do
   hyprctl dispatch "hl.dsp.exec_cmd([[$cmd]], { monitor = \"$monitor\" })" >/dev/null

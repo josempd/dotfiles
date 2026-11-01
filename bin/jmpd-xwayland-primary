@@ -1,7 +1,4 @@
 #!/bin/sh
-# Makes the monitor whose description is $1 the X primary output, if it's connected.
-# Fullscreen XWayland games size themselves to the primary, which XWayland otherwise sets to
-# whichever output it enumerates first; Hyprland has no setting for it, so this runs at
-# every Hyprland start (hypr/hyprland.lua).
+# Makes the monitor described by $1 the X primary, which fullscreen XWayland games size to (Hyprland can't set it)
 out=$(hyprctl monitors -j | jq -r --arg d "$1" '.[] | select(.description == $d) | .name')
 [ -n "$out" ] && exec xrandr --output "$out" --primary

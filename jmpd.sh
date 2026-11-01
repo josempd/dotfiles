@@ -196,6 +196,7 @@ setup_tools() {
     uv tool install terminaltexteffects
     command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | bash
     command -v codex >/dev/null || curl -fsSL https://chatgpt.com/codex/install.sh | sh
+    ln -sfn ../../check.sh "$DIR/.git/hooks/pre-commit"
     # One copy of the skills in agents/skills, linked for Claude Code and Codex
     local dir skill
     for dir in "$HOME/.claude/skills" "$HOME/.codex/skills"; do

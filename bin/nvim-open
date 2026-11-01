@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
-# nvim-open [+LINE] FILE[:LINE[:COL]]
-# Open FILE in the running project nvim (socket /tmp/nvim-<project>.sock, see
-# ~/.config/nvim/lua/custom/agentic_opts.lua) and focus its tmux pane.
-# Used by kitty hints (ctrl+shift+p>n / >f) and xdg-open (nvim-remote.desktop).
-# Falls back to a new tmux window / kitty window when no nvim is listening.
+# nvim-open [+LINE] FILE[:LINE[:COL]]: open in the project's nvim and focus its pane, else a new tmux/kitty window
 set -euo pipefail
 
 line=""
@@ -31,12 +27,11 @@ pick_socket() {
 }
 
 if sock="$(pick_socket)" && nvim --server "$sock" --remote-expr '1' >/dev/null 2>&1; then
-  # Relative paths resolve against nvim's cwd (the project root), which is how
-  # Claude prints them.
+  # Relative paths resolve against nvim's cwd, the project root, as Claude prints them
   esc="$(nvim --server "$sock" --remote-expr "fnameescape('${target//\'/\'\'}')")"
   nvim --server "$sock" --remote-send "<C-\\><C-n>:edit ${line:++$line }$esc<CR>" >/dev/null
   pane="$(nvim --server "$sock" --remote-expr '$TMUX_PANE' 2>/dev/null || true)"
-  if [[ -n "$pane" ]] && command -v tmux >/dev/null; then
+  if [[ -n "$pane" ]]; then
     tmux select-window -t "$pane" 2>/dev/null && tmux select-pane -t "$pane" 2>/dev/null || true
   fi
   exit 0

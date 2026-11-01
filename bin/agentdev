@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# agentdev [DIR] — single-screen tmux workspace for agent-driven work on a repo.
-#
-# Left: claude over `claude agents`; right: nvim (project socket for nvim-open). Re-running attaches.
+# agentdev [DIR]: tmux workspace for a repo, claude over `claude agents` beside nvim; re-running attaches
 set -euo pipefail
 
 dir="$(cd "${1:-.}" && pwd)"
