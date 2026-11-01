@@ -37,7 +37,7 @@ hl.config({
         },
     },
     decoration = {
-        rounding         = 8,
+        rounding         = 10,
         -- Unfocused windows go slightly frosted; the focused one stays solid
         inactive_opacity = 0.95,
         -- Focus reads as elevation: a deep shadow on the active window, a faint one elsewhere
