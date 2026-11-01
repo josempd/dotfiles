@@ -51,7 +51,7 @@ PACKAGES=(
     impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
     playerctl power-profiles-daemon ufw
     gnome-keyring xdg-desktop-portal-gtk
-    ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra
+    ttf-jetbrains-mono-nerd adwaita-fonts noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra
 
     # NVIDIA (open modules via DKMS), Steam with its 32-bit driver, CUDA for llama.cpp
     linux-headers nvidia-open-dkms nvidia-utils egl-wayland libva-nvidia-driver
@@ -78,6 +78,7 @@ FILES=(
     "gitconfig $HOME/.gitconfig"
     "tmux.conf $HOME/.tmux.conf"
     "kitty.conf $HOME/.config/kitty/kitty.conf"
+    "fontconfig $HOME/.config/fontconfig"
     "brave-flags.conf $HOME/.config/brave-flags.conf"
     "cursor-flags.conf $HOME/.config/cursor-flags.conf"
     "nvim $HOME/.config/nvim"

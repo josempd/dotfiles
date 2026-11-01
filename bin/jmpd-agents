@@ -213,7 +213,7 @@ class Panel(Gtk.ApplicationWindow):
         return label(ROBOT, "glyph")
 
     def section(self, r):
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         box.add_css_class("agent")
 
         title = Gtk.Box(spacing=8)

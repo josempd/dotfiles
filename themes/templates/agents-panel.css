@@ -1,4 +1,4 @@
-/* Agents window (jmpd-agents-panel); Hyprland draws the border. Colors from the current theme (jmpd-theme). */
+/* Agents window (jmpd-agents-panel); Hyprland draws the border. Colors from the current theme (jmpd-theme). Type: 14px body, 12px secondary */
 window.panel {
   background-color: {{ background }};
 }
@@ -6,12 +6,11 @@ window.panel {
 .content {
   padding: 16px;
   font-family: 'JetBrainsMono Nerd Font';
-  font-size: 13px;
+  font-size: 14px;
   color: {{ foreground }};
 }
 
 .title {
-  font-size: 15px;
   font-weight: bold;
   color: {{ bright_foreground }};
 }
@@ -22,6 +21,7 @@ window.panel {
 }
 
 .muted {
+  font-size: 12px;
   color: {{ muted }};
 }
 
