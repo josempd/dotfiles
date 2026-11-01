@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=X
+Comment=X as an app window
+Exec=brave --app=https://x.com
+Terminal=false
+Type=Application
+Icon=x
+StartupWMClass=brave-x.com__-Default
+Categories=Network;

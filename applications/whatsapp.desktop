@@ -2,9 +2,9 @@
 Version=1.0
 Name=WhatsApp
 Comment=WhatsApp Web as an app window
-Exec=brave --app=https://web.whatsapp.com --class=WhatsApp
+Exec=brave --app=https://web.whatsapp.com
 Terminal=false
 Type=Application
 Icon=whatsapp
-StartupWMClass=WhatsApp
+StartupWMClass=brave-web.whatsapp.com__-Default
 Categories=Network;Chat;

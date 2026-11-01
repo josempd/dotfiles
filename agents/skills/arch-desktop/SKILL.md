@@ -87,7 +87,7 @@ keyd `[control+shift]` passes Ctrl+Shift+Left/Right through (tmux pane focus). I
 - **Memory**: zram the size of RAM, sysctl reclaim tuned for it, systemd-oomd killing the worst app scope or tmux pane before the kernel OOM killer (`system/`, `systemd-dropins/`).
 - **Local LLM**: `setup_llama_server` builds `~/llama.cpp` with CUDA at the pinned `ref` (move `ref` to upgrade; the build reruns). Models in `~/models` are fetched by hand. qwen for coding runs on demand via `~/code/pi-harness/scripts/llama-serve.sh` (127.0.0.1:8080). Claudia's brain is `~/.config/systemd/user/llama-server.service` (machine-local, disabled).
 - **Gaming**: multilib, steam with lib32-nvidia-utils. `misc.exit_window_retains_fullscreen` keeps Big Picture fullscreen after a game exits; `jmpd-xwayland-primary` makes the TV the X primary at Hyprland start, so XWayland games size to its 4K.
-- **Apps**: Cursor from AUR `cursor-bin` (flags in `cursor-flags.conf`), Brave flags in `brave-flags.conf`. Web apps are `applications/*.desktop` running `brave --app=URL --class=NAME`, icons in `icons/`.
+- **Apps**: Cursor from AUR `cursor-bin` (flags in `cursor-flags.conf`), Brave flags in `brave-flags.conf`. Web apps are `applications/*.desktop` running `brave --app=URL` (Wayland ignores `--class`; the window class is `brave-HOST__-Default`, used as `StartupWMClass`), icons in `icons/`.
 - **Window buttons**: `close,maximize:` on the left (gsettings + the `gtk-settings.ini` template). No minimize: Hyprland has no minimized state.
 - **Boot and network**: systemd-boot with UKIs, no Plymouth. systemd-networkd + iwd; `systemd-networkd-wait-online` is masked, so nothing blocks boot on the network.
 
