@@ -1,4 +1,4 @@
-/* Square, colors from the current theme (jmpd-theme), matching the Omarchy-style bar and lockscreen */
+/* Square, raised a step above the windows with a hairline border; colors from the current theme (jmpd-theme) */
 * {
   font-family: 'JetBrainsMono Nerd Font';
   font-size: 14px;
@@ -6,8 +6,8 @@
 }
 
 window {
-  background-color: {{ background }};
-  border: 2px solid {{ accent }};
+  background-color: {{ lighter_background }};
+  border: 1px solid {{ muted }};
 }
 
 #outer-box {
@@ -15,7 +15,7 @@ window {
 }
 
 #input {
-  background-color: {{ dark_background }};
+  background-color: {{ background }};
   color: {{ foreground }};
   border: none;
   padding: 8px 10px;
@@ -28,7 +28,7 @@ window {
 }
 
 #entry:selected {
-  background-color: {{ lighter_background }};
+  background-color: {{ selection }};
   outline: none;
 }
 
