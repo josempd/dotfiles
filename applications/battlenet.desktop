@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Battle.net
+Comment=Blizzard launcher (GE-Proton prefix in ~/Games/battlenet)
+Exec=sh -c "p=\\$HOME/Games/battlenet; STEAM_COMPAT_DATA_PATH=\\$p STEAM_COMPAT_CLIENT_INSTALL_PATH=\\$HOME/.local/share/Steam exec \\$HOME/.local/share/Steam/compatibilitytools.d/GE-Proton11-11-x86_64/proton run \\$p/drive_c/'Program Files (x86)'/Battle.net/'Battle.net Launcher.exe'"
+Icon=battlenet
+Terminal=false
+Categories=Game;
+StartupWMClass=steam_proton
