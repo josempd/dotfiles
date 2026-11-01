@@ -27,8 +27,8 @@ end
 
 hl.config({
     general = {
-        gaps_in          = 5,
-        gaps_out         = 10,
+        gaps_in          = 6,
+        gaps_out         = 12,
         border_size      = 1,
         resize_on_border = true,
         col = {
@@ -41,7 +41,7 @@ hl.config({
         -- Focus reads as elevation: a deep shadow on the active window, a faint one elsewhere
         shadow   = {
             enabled        = true,
-            range          = 24,
+            range          = 16,
             render_power   = 3,
             offset         = { 0, 4 },
             color          = theme.shadow,
