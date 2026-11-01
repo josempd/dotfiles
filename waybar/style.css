@@ -12,12 +12,13 @@
   font-size: 12px;
 }
 
+/* 4.5 + the end modules' 7.5 = 12px, the windows' outer gap */
 .modules-left {
-  margin-left: 8px;
+  margin-left: 4.5px;
 }
 
 .modules-right {
-  margin-right: 8px;
+  margin-right: 4.5px;
 }
 
 #workspaces button {
