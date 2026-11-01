@@ -138,7 +138,7 @@ class Panel(Gtk.ApplicationWindow):
         keys.connect("key-pressed", lambda _c, key, *_: key == Gdk.KEY_Escape and self.close())
         self.add_controller(keys)
 
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.box.add_css_class("content")
         self.set_child(Gtk.ScrolledWindow(child=self.box, hscrollbar_policy=Gtk.PolicyType.NEVER))
         self.light = light_mode()
@@ -196,7 +196,7 @@ class Panel(Gtk.ApplicationWindow):
         parts = [f"{tokens(today)} tokens today", f"{tokens(week)} this week"]
         if prompts:
             parts.insert(1, f"{prompts} prompts")
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         box.add_css_class("hero")
         box.append(label(" · ".join(parts), "stat"))
         if models:
@@ -213,7 +213,7 @@ class Panel(Gtk.ApplicationWindow):
         return label(ROBOT, "glyph")
 
     def section(self, r):
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         box.add_css_class("agent")
 
         title = Gtk.Box(spacing=8)
@@ -255,7 +255,7 @@ class Panel(Gtk.ApplicationWindow):
 
     def meter(self, limit):
         pct = max(0.0, min(1.0, float(limit.get("percent") or 0)))
-        row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         line = Gtk.Box(spacing=8)
         line.append(label(limit.get("title") or limit.get("label", ""), "limit", hexpand=True))
         reset = until(limit["resetsAt"]) if limit.get("resetsAt") else ""

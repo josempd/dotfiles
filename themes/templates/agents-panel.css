@@ -4,7 +4,7 @@ window.panel {
 }
 
 .content {
-  padding: 16px 18px;
+  padding: 16px;
   font-family: 'JetBrainsMono Nerd Font';
   font-size: 13px;
   color: {{ foreground }};
@@ -30,12 +30,12 @@ window.panel {
 }
 
 .hero {
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 1px solid {{ lighter_background }};
 }
 
 .agent {
-  padding-top: 2px;
+  padding-top: 4px;
 }
 
 .glyph {

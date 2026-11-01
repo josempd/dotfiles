@@ -27,8 +27,8 @@ end
 
 hl.config({
     general = {
-        gaps_in          = 8,
-        gaps_out         = 16,
+        gaps_in          = 5,
+        gaps_out         = 10,
         border_size      = 1,
         resize_on_border = true,
         col = {
