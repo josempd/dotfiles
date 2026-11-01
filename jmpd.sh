@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ~/localsetup/local-setup.sh
+# ~/code/dotfiles/jmpd.sh
 # Personal local setup script for Arch Linux
 
 set -euo pipefail
@@ -387,10 +387,10 @@ setup_powerlevel10k() {
         1
 }
 
-# 6. mise runtimes: node, python, pnpm, bun, pi (versions in mise/config.toml)
+# 6. mise runtimes: node, python, pnpm, bun, pi (versions in mise/global.toml)
 setup_mise() {
     info "Setting up mise..."
-    install_file "$SCRIPT_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
+    install_file "$SCRIPT_DIR/mise/global.toml" "$HOME/.config/mise/config.toml"
     install_file "$SCRIPT_DIR/uv/uv.toml" "$HOME/.config/uv/uv.toml"
     mise install --yes
     ok "mise tools installed"

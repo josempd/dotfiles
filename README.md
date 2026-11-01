@@ -7,8 +7,8 @@ Bootstrap script and dotfiles for Arch Linux + Hyprland.
 ```bash
 git clone https://github.com/josempd/dotfiles.git ~/localsetup
 cd ~/localsetup
-chmod +x local-setup.sh
-./local-setup.sh
+chmod +x jmpd.sh
+./jmpd.sh
 ```
 
 The script is idempotent — safe to re-run at any time. It will skip anything already installed.
@@ -19,7 +19,7 @@ The script is idempotent — safe to re-run at any time. It will skip anything a
 2. **Default shell** — sets zsh as the login shell
 3. **Oh My Zsh** — framework + plugins (autosuggestions, syntax-highlighting)
 4. **Powerlevel10k** — zsh theme
-5. **mise** — Node 24, Python 3.14 (+3.11), pnpm, bun and pi from `mise/config.toml`; `uv/uv.toml` makes uv use mise's Pythons
+5. **mise** — Node 24, Python 3.14 (+3.11), pnpm, bun and pi from `mise/global.toml`; `uv/uv.toml` makes uv use mise's Pythons
 6. **Docker** — enables the service and adds you to the `docker` group
 7. **Kitty** — config and Catppuccin theme
 8. **Neovim** — config from `nvim/` (kickstart.nvim + catppuccin, LSPs, neo-tree, agentic opts)
@@ -44,12 +44,12 @@ Fork/clone this repo and edit the following files:
 | `p10k.zsh` | Powerlevel10k prompt style (or re-run `p10k configure`) |
 | `kitty.conf` | Terminal font, theme, keybindings |
 | `nvim/` | Neovim config — copied to `~/.config/nvim` |
-| `local-setup.sh` | AUR app list, packages, or any steps you don't need |
+| `jmpd.sh` | AUR app list, packages, or any steps you don't need |
 
 ## Adding a new step
 
 1. Drop any config files in this directory.
-2. Add a `setup_X` function in `local-setup.sh`.
+2. Add a `setup_X` function in `jmpd.sh`.
 3. Call it from `main`.
 
 ## Post-install: Bluetooth keyboard stability (Realtek adapters)

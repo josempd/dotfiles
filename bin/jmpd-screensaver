@@ -1,5 +1,5 @@
 #!/bin/bash
-# Screensaver, adapted from Omarchy's: random tte effects on the JMPD logo in a
+# Screensaver, adapted from Omarchy's: random tte effects on the JMPD.SH logo in a
 # fullscreen kitty. Any key, or losing focus, quits it into the lock screen (a session lock
 # hides every other window, so the animation can't play while locked). Started by
 # jmpd-screensaver-launch.

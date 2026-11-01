@@ -74,7 +74,7 @@ local menu        = "pkill -x wofi || uwsm-app -- wofi"
 --   hl.exec_cmd("waybar & hyprpaper & firefox")
 -- end)
 
--- waybar, hyprpaper and hypridle run as systemd user services (local-setup.sh enables them).
+-- waybar, hyprpaper and hypridle run as systemd user services (jmpd.sh enables them).
 -- The polkit agent shows the password prompt when an app asks for admin rights.
 hl.on("hyprland.start", function ()
     hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
@@ -94,7 +94,7 @@ hl.env("HYPRCURSOR_SIZE", "24")
 
 -- NVIDIA as the only GPU (the RTX 3090 desktop): it drives the screens, so VA-API and GLX use its
 -- driver too. Not on the laptop, where the panel is on the AMD iGPU and forcing these gives
--- Chromium (Brave) black video. Same test as nvidia_only in local-setup.sh.
+-- Chromium (Brave) black video. Same test as nvidia_only in jmpd.sh.
 local gpus = io.popen([[for d in /sys/bus/pci/devices/*; do
     case "$(cat "$d/class")" in 0x03*) cat "$d/vendor" ;; esac
 done | sort -u]])

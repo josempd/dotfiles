@@ -34,15 +34,31 @@ Rectangle {
     anchors.centerIn: parent
     spacing: 40
 
-    Text {
+    // Same block logo as the screensaver (hypr/screensaver.txt), one color per row
+    Column {
       id: logo
-      text: "JMPD"
-      color: "#89b4fa"
-      font.family: "JetBrainsMono Nerd Font"
-      font.pixelSize: 140
-      font.bold: true
-      font.letterSpacing: 12
+      spacing: -Math.ceil(Math.max(12, Math.floor(root.width / 70)) * 0.08)
       anchors.horizontalCenter: parent.horizontalCenter
+
+      Repeater {
+        model: [
+          ["     ██╗███╗   ███╗██████╗ ██████╗    ███████╗ ██╗  ██╗", "#89b4fa"],
+          ["     ██║████╗ ████║██╔══██╗██╔══██╗   ██╔════╝ ██║  ██║", "#94b0f9"],
+          ["     ██║██╔████╔██║██████╔╝██║  ██║   ███████╗ ███████║", "#a0adf9"],
+          ["██   ██║██║╚██╔╝██║██╔═══╝ ██║  ██║   ╚════██║ ██╔══██║", "#b4a9f8"],
+          ["╚█████╔╝██║ ╚═╝ ██║██║     ██████╔╝██╗███████║ ██║  ██║", "#c0a7f7"],
+          [" ╚════╝ ╚═╝     ╚═╝╚═╝     ╚═════╝ ╚═╝╚══════╝ ╚═╝  ╚═╝", "#cba6f7"]
+        ]
+
+        Text {
+          text: modelData[0]
+          color: modelData[1]
+          font.family: "JetBrainsMono Nerd Font"
+          font.pixelSize: Math.max(12, Math.floor(root.width / 70))
+          renderType: Text.NativeRendering
+          font.letterSpacing: -1
+        }
+      }
     }
 
     Row {

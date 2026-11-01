@@ -1,4 +1,4 @@
-# Backups created by local-setup.sh
+# Backups created by jmpd.sh
 *.bak.*
 
 # Secrets — never commit
