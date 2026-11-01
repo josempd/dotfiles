@@ -69,7 +69,7 @@ PACKAGES=(
     aws-cli-v2 terraform sshpass openfortivpn tailscale
 
     # AUR
-    brave-bin yaru-icon-theme hyprland-preview-share-picker-git slack-desktop lastpass-cli cursor-bin
+    brave-bin yaru-icon-theme hyprland-preview-share-picker-git slack-desktop cursor-bin
 )
 
 FILES=(
@@ -125,7 +125,11 @@ setup_packages() {
         (cd "$tmp" && makepkg -si --noconfirm)
         rm -rf "$tmp"
     fi
-    yay -Syu --needed --noconfirm "${PACKAGES[@]}"
+    yay -Syu --noconfirm
+    local missing
+    missing=$(pacman -T "${PACKAGES[@]}" || true)
+    # shellcheck disable=SC2086
+    if [[ -n $missing ]]; then yay -S --noconfirm $missing; fi
 }
 
 setup_files() {
