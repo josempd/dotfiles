@@ -129,19 +129,19 @@ if gpus then gpus:close() end
 ---- LOOK AND FEEL ----
 -----------------------
 
--- Border colors come from the current theme (jmpd-theme writes theme.lua)
+-- Border and shadow colors come from the current theme (jmpd-theme writes theme.lua)
 local ok, theme = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/theme.lua")
 if not ok then
-    theme = { active_border = "rgb(89b4fa)", inactive_border = "rgba(595959aa)" }
+    theme = { active_border = "rgb(595959)", inactive_border = "rgb(303030)", shadow = "rgba(000000a0)", shadow_inactive = "rgba(00000050)" }
 end
 
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     general = {
-        gaps_in  = 5,
-        gaps_out = 10,
+        gaps_in  = 6,
+        gaps_out = 12,
 
-        border_size = 2,
+        border_size = 1,
 
         col = {
             active_border   = theme.active_border,
@@ -158,18 +158,25 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 0,                 -- square corners, as in Omarchy
+        rounding       = 10,
 
         -- Change transparency of focused and unfocused windows
         active_opacity   = 1.0,
-        inactive_opacity = 1.0,
+        inactive_opacity = 0.95,           -- unfocused windows go slightly frosted
 
+        -- Focus reads as elevation: a deep shadow on the active window, a faint one elsewhere
         shadow = {
-            enabled = false,
+            enabled        = true,
+            range          = 16,
+            render_power   = 3,
+            offset         = { 0, 4 },
+            color          = theme.shadow,
+            color_inactive = theme.shadow_inactive,
         },
 
         blur = {
-            enabled = false,
+            size   = 4,
+            passes = 2,
         },
     },
 

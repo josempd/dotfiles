@@ -1,21 +1,21 @@
 /* Adapted from Omarchy 3.8 (config/swayosd/style.css). Colors from the current theme (jmpd-theme). */
-@define-color background-color {{ background }};
-@define-color border-color {{ foreground }};
+@define-color background-color {{ lighter_background }};
+@define-color border-color {{ muted }};
 @define-color label {{ foreground }};
 @define-color image {{ foreground }};
 @define-color progress {{ accent }};
 
 window {
-  border-radius: 0;
+  border-radius: 10px;
   opacity: 0.97;
-  border: 2px solid @border-color;
+  border: 1px solid @border-color;
 
   background-color: @background-color;
 }
 
 label {
   font-family: 'JetBrainsMono Nerd Font';
-  font-size: 11pt;
+  font-size: 14px;
 
   color: @label;
 }
@@ -25,7 +25,7 @@ image {
 }
 
 progressbar {
-  border-radius: 0;
+  border-radius: 4px;
 }
 
 progress {

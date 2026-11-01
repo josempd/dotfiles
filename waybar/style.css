@@ -12,12 +12,13 @@
   font-size: 12px;
 }
 
+/* 4.5 + the end modules' 7.5 = 12px, the windows' outer gap */
 .modules-left {
-  margin-left: 8px;
+  margin-left: 4.5px;
 }
 
 .modules-right {
-  margin-right: 8px;
+  margin-right: 4.5px;
 }
 
 #workspaces button {
@@ -84,8 +85,17 @@
   margin-right: 18px;
 }
 
+/* Raised like the other popups */
 tooltip {
-  padding: 2px;
+  background-color: @surface;
+  border: 1px solid @hairline;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+tooltip * {
+  background-color: transparent;
+  text-shadow: none;
 }
 
 #battery.warning {
