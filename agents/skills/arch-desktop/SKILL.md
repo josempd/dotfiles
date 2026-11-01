@@ -93,7 +93,7 @@ keyd `[control+shift]` passes Ctrl+Shift+Left/Right through (tmux pane focus). I
 
 ## Themes
 
-`jmpd-theme` applies Omarchy themes: it reads a theme's `colors.toml` (sparse clone at `~/.local/share/omarchy-themes`, or `~/.config/jmpd-theme/themes/NAME`) and renders `themes/templates/*` into the waybar, hypr borders (`theme.lua`), hyprlock, hyprpaper, kitty, wofi, mako, swayosd, share picker, agents panel, GTK and qt6ct configs. It also sets the gsettings icon theme (a Yaru color), `color-scheme` and `gtk-theme`, then reloads everything. Commands: `jmpd-theme` (menu), `set NAME`, `bg-next`, `reapply` (after editing templates; `jmpd.sh` runs it), `list`, `update`. Colors go into templates as `{{ key }}` (or `{{ key_strip }}` for hex without `#`), never into the configs. tmux and Neovim are not themed.
+`jmpd-theme` applies Omarchy themes: it reads a theme's `colors.toml` (sparse clone at `~/.local/share/omarchy-themes`, or `~/.config/jmpd-theme/themes/NAME`) and renders `themes/templates/*` into the waybar, hypr borders (`theme.lua`), hyprlock, hyprpaper, kitty, wofi, mako, swayosd, share picker, agents panel, btop, GTK and qt6ct configs. It also sets the gsettings icon theme (a Yaru color), `color-scheme` and `gtk-theme`, then reloads everything. Commands: `jmpd-theme` (menu), `set NAME`, `bg-next`, `reapply` (after editing templates; `jmpd.sh` runs it), `list`, `update`. Colors go into templates as `{{ key }}` (or `{{ key_strip }}` for hex without `#`), never into the configs. tmux and Neovim are not themed.
 
 ## Reinstall keeping @home
 
