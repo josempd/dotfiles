@@ -1,0 +1,10 @@
+# Global runtimes; project mise.toml / .python-version files override these
+[tools]
+node = "24"
+python = ["3.14", "3.11"]
+pnpm = "latest"
+bun = "latest"
+"npm:@earendil-works/pi-coding-agent" = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["python", "node"]

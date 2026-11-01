@@ -169,8 +169,8 @@ setup_packages() {
         # Apps
         nautilus sushi imv mpv papers obsidian telegram-desktop discord zed spotify-launcher
 
-        # Languages and runtimes (Node and Bun come from their own installers below)
-        go pyenv uv python
+        # Languages and runtimes (node, python, pnpm, bun, pi come from mise below)
+        go mise uv python
 
         # Containers and Kubernetes
         docker docker-buildx docker-compose
@@ -387,71 +387,13 @@ setup_powerlevel10k() {
         1
 }
 
-# 6. nvm + Node.js 24
-setup_nvm() {
-    info "Setting up nvm..."
-    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-
-    if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-        skip "nvm already installed at $NVM_DIR"
-    else
-        info "Installing nvm via official install script"
-        # The installer exits if NVM_DIR is set but the directory doesn't exist yet.
-        mkdir -p "$NVM_DIR"
-        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
-        ok "nvm installed"
-    fi
-
-    # Source nvm so we can use it in this session
-    # shellcheck source=/dev/null
-    [[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
-
-    if ! command -v nvm >/dev/null 2>&1; then
-        warn "nvm function not available — skipping Node.js install"
-        return 0
-    fi
-
-    if nvm ls --no-colors 24 >/dev/null 2>&1; then
-        skip "Node.js 24 already installed"
-    else
-        info "Installing Node.js 24 via nvm"
-        nvm install 24
-        nvm alias default 24
-        ok "Node.js installed: $(node --version)"
-    fi
-}
-
-# 7. Bun
-setup_bun() {
-    info "Setting up bun..."
-    export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-
-    if [[ -x "$BUN_INSTALL/bin/bun" ]]; then
-        skip "bun already installed: $("$BUN_INSTALL/bin/bun" --version)"
-        return 0
-    fi
-
-    info "Installing bun via official installer"
-    curl -fsSL https://bun.sh/install | bash
-    ok "bun installed"
-}
-
-# 8. Python via pyenv (build deps come from base-devel and the default Arch libs)
-setup_python() {
-    info "Setting up Python..."
-    export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
-    eval "$(pyenv init -)" 2>/dev/null || true
-
-    if pyenv versions --bare 2>/dev/null | grep -q '^3\.'; then
-        skip "Python 3 already installed via pyenv"
-    else
-        local py_version
-        py_version="$(pyenv install --list | grep -E '^\s+3\.[0-9]+\.[0-9]+$' | tail -1 | tr -d ' ')"
-        info "Installing Python $py_version via pyenv"
-        pyenv install "$py_version"
-        pyenv global "$py_version"
-        ok "Python $py_version installed and set as global"
-    fi
+# 6. mise runtimes: node, python, pnpm, bun, pi (versions in mise/config.toml)
+setup_mise() {
+    info "Setting up mise..."
+    install_file "$SCRIPT_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
+    install_file "$SCRIPT_DIR/uv/uv.toml" "$HOME/.config/uv/uv.toml"
+    mise install --yes
+    ok "mise tools installed"
 }
 
 # 9. Docker service and group
@@ -549,20 +491,6 @@ setup_codex() {
     fi
     curl -fsSL https://chatgpt.com/codex/install.sh | sh
     ok "Codex installed (run: codex login)"
-}
-
-# 12d. pi coding agent (npm, on nvm's Node); config and sessions live in ~/.pi/agent
-setup_pi() {
-    info "Setting up pi..."
-    export NVM_DIR="$HOME/.nvm"
-    # shellcheck source=/dev/null
-    source "$NVM_DIR/nvm.sh"
-    if have pi; then
-        skip "pi already installed: $(pi --version 2>/dev/null | tail -1)"
-        return 0
-    fi
-    npm install -g @earendil-works/pi-coding-agent
-    ok "pi installed"
 }
 
 
@@ -716,16 +644,13 @@ main() {
     setup_oh_my_zsh
     setup_zsh_plugins
     setup_powerlevel10k
-    setup_nvm
-    setup_bun
-    setup_python
+    setup_mise
     setup_docker
     setup_kitty
     setup_neovim
     setup_hyprland
     setup_claude
     setup_codex
-    setup_pi
     setup_agent_skills
     setup_aur_apps
     setup_defaults

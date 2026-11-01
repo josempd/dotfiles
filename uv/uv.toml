@@ -1,0 +1,3 @@
+# Interpreters come from mise; uv only manages venvs, deps and locks
+python-preference = "only-system"
+python-downloads = "never"
