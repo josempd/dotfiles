@@ -64,8 +64,8 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 | Super+V / F / P | Float / fullscreen / pseudo; Super+Shift+T toggle split |
 | Super+S, Super+Shift+S | Scratchpad; Cmd+M / Cmd+H send window to it |
 | Cmd+Tab | Cycle windows |
-| Super+Escape | Power menu (lock, suspend, log out, reboot, shut down) |
-| Super+Shift+Escape | Log out (`uwsm stop`; never exit Hyprland directly) |
+| Cmd+Escape | Power menu (lock, suspend, log out, reboot, shut down) |
+| Cmd+Shift+Q | Log out (`uwsm stop`; never exit Hyprland directly) |
 | Ctrl+Cmd+Q | Lock |
 | Super+Shift+Space / Super+Ctrl+Shift+Space | Next wallpaper / theme menu |
 | Super+Ctrl+V | Clipboard history (cliphist + wofi) |

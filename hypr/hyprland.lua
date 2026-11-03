@@ -113,8 +113,6 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("uwsm-app -- brave"))
-hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("pkill -x wofi || jmpd-power-menu"))
-hl.bind(mainMod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"))  -- log out; uwsm stops the session's services first
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
@@ -142,6 +140,8 @@ local annotate = shots .. ' && grim -g "$(slurp)" - | satty --filename - --outpu
     .. ' --actions-on-enter save-to-clipboard,exit --early-exit copy save'
 hl.bind(keyd .. "Q",             hl.dsp.window.close())                       -- Cmd+Q
 hl.bind(keyd .. "space",         hl.dsp.exec_cmd(menu))                       -- Cmd+Space
+hl.bind(keyd .. "Escape",        hl.dsp.exec_cmd("pkill -x wofi || jmpd-power-menu"))  -- Cmd+Escape
+hl.bind(keyd .. "SHIFT + Q",     hl.dsp.exec_cmd("uwsm stop"))                -- Cmd+Shift+Q, log out; uwsm stops the session's services first
 hl.bind(mainMod .. " + SHIFT + space",        hl.dsp.exec_cmd("jmpd-theme bg-next"))               -- next wallpaper
 hl.bind(mainMod .. " + CTRL + V",             hl.dsp.exec_cmd("pkill -x wofi || jmpd-clipboard"))  -- clipboard history
 hl.bind(mainMod .. " + CTRL + SHIFT + space", hl.dsp.exec_cmd("pkill -x wofi || jmpd-theme"))      -- theme menu
