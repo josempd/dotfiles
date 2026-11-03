@@ -125,6 +125,17 @@ for key, dir in pairs({ H = "left", L = "right", K = "up", J = "down", left = "l
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.swap({ direction = dir }))
 end
 
+-- Super+Cmd+arrows move the focused window's split line that way; smart resizing (edge nearest the mouse) is off just for the step
+local function resize(dx, dy)
+    hl.config({ dwindle = { smart_resizing = false } })
+    hl.dispatch(hl.dsp.window.resize({ x = dx, y = dy, relative = true }))
+    hl.config({ dwindle = { smart_resizing = true } })
+end
+-- keyd sends Cmd+Left/Right/Up/Down as Ctrl+Left/Right/Home/End
+for key, d in pairs({ left = { -60, 0 }, right = { 60, 0 }, Home = { 0, -60 }, End = { 0, 60 } }) do
+    hl.bind(mainMod .. " + CTRL + " .. key, function () resize(d[1], d[2]) end, { repeating = true })
+end
+
 local shots = "mkdir -p ~/Pictures/Screenshots && f=~/Pictures/Screenshots/$(date +%F_%H-%M-%S).png"
 -- Area into satty, like flameshot: Enter copies and closes, Ctrl+S saves
 local annotate = shots .. ' && grim -g "$(slurp)" - | satty --filename - --output-filename "$f" --copy-command wl-copy'
