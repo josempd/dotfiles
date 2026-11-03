@@ -50,16 +50,16 @@ Not checked by script:
 
 ## Keyboard (keyd + Hyprland)
 
-macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr (layout `us` variant `alt-intl`, for Spanish; the SDDM greeter uses the same). keyd turns Cmd shortcuts into app keys (Cmd+C/V become Ctrl+Insert/Shift+Insert) and Cmd system shortcuts into Ctrl+Super combos that `hyprland.lua` binds. Super is the window key.
+macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr (layout `us` variant `alt-intl`, for Spanish; the SDDM greeter uses the same). keyd turns Cmd shortcuts into app keys (Cmd+C/V become Ctrl+Insert/Shift+Insert, Cmd+1..9 Ctrl+1..9 for tabs) and system shortcuts (Cmd ones, Ctrl+arrows, Ctrl+digits) into Ctrl+Alt+Super combos, the `keyd` prefix in `hyprland.lua`; nothing physical types Alt, so they never collide. Super is the window key; Ctrl is the workspace key.
 
 | Keys | Action |
 |---|---|
-| Super+Space, Cmd+Space | App launcher (wofi) |
+| Cmd+Space | App launcher (wofi) |
 | Super+T, Super+Return | Terminal (kitty, always inside tmux) |
 | Super+B / Super+E | Brave / Files (nautilus) |
-| Super+Q, Cmd+Q | Close window (Cmd+W closes tabs) |
+| Cmd+Q | Close window (Cmd+W closes tabs, Cmd+1..9 picks a browser tab) |
 | Super+arrows, Super+H/J/K/L | Focus window |
-| Super+1..0, Super+Shift+1..0 | Go to / move to workspace; Ctrl+Left/Right previous/next |
+| Ctrl+1..0, Super+Shift+1..0 | Go to workspace / move window to it; Ctrl+Left/Right previous/next |
 | Super+V / F / P | Float / fullscreen / pseudo; Super+Shift+T toggle split |
 | Super+S, Super+Shift+S | Scratchpad; Cmd+M / Cmd+H send window to it |
 | Cmd+Tab | Cycle windows |
@@ -71,7 +71,8 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 | Super+Ctrl+B / A / W / T | bluetui / wiremix / impala / btop, same as the bar icons |
 | Cmd+Shift+3 / 4 | Screenshot screen / area, copied |
 | Print, Cmd+Shift+5 | Area into satty: Enter copies and closes, Ctrl+S saves |
-| Cmd+arrows | Line start/end, document top/bottom; Option+Backspace deletes a word |
+| Cmd+arrows | Word left/right, document top/bottom; Option+Backspace deletes a word |
+| Option+1/2/3 | Copy the last / 2nd / 3rd command with its output (tmux) |
 
 keyd `[control+shift]` passes Ctrl+Shift+Left/Right through (tmux pane focus). In kitty, Shift+Enter sends Alt+Enter so Claude Code/Codex insert a newline, also inside tmux. Before adding a Super binding, check keyd's `[opt:M]` layer does not remap that key.
 

@@ -99,8 +99,9 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 hl.workspace_rule({ workspace = "1", monitor = tv,     default = true })
 hl.workspace_rule({ workspace = "2", monitor = lenovo, default = true })
 
--- Super is the window key; keyd sends the Cmd system shortcuts as Ctrl+Super (marked "Cmd" below)
+-- Super is the window key; keyd sends the Cmd and Ctrl system shortcuts as Ctrl+Alt+Super (marked below)
 local mainMod = "SUPER"
+local keyd = "CTRL + ALT + SUPER + "
 
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
@@ -121,10 +122,8 @@ local shots = "mkdir -p ~/Pictures/Screenshots && f=~/Pictures/Screenshots/$(dat
 -- Area into satty, like flameshot: Enter copies and closes, Ctrl+S saves
 local annotate = shots .. ' && grim -g "$(slurp)" - | satty --filename - --output-filename "$f" --copy-command wl-copy'
     .. ' --actions-on-enter save-to-clipboard,exit --early-exit copy save'
-hl.bind("ALT + F4",              hl.dsp.window.close())                       -- Cmd+Q
-hl.bind(mainMod .. " + Q",       hl.dsp.window.close())
-hl.bind("CTRL + SUPER + space",  hl.dsp.exec_cmd(menu))                       -- Cmd+Space
-hl.bind(mainMod .. " + space",   hl.dsp.exec_cmd(menu))
+hl.bind(keyd .. "Q",             hl.dsp.window.close())                       -- Cmd+Q
+hl.bind(keyd .. "space",         hl.dsp.exec_cmd(menu))                       -- Cmd+Space
 hl.bind(mainMod .. " + SHIFT + space",        hl.dsp.exec_cmd("jmpd-theme bg-next"))               -- next wallpaper
 hl.bind(mainMod .. " + CTRL + V",             hl.dsp.exec_cmd("pkill -x wofi || jmpd-clipboard"))  -- clipboard history
 hl.bind(mainMod .. " + CTRL + SHIFT + space", hl.dsp.exec_cmd("pkill -x wofi || jmpd-theme"))      -- theme menu
@@ -132,20 +131,20 @@ hl.bind(mainMod .. " + CTRL + B",             hl.dsp.exec_cmd(terminal .. " -e b
 hl.bind(mainMod .. " + CTRL + A",             hl.dsp.exec_cmd(terminal .. " -e wiremix"))
 hl.bind(mainMod .. " + CTRL + W",             hl.dsp.exec_cmd(terminal .. " -e impala"))
 hl.bind(mainMod .. " + CTRL + T",             hl.dsp.exec_cmd(terminal .. " -e btop"))
-hl.bind("CTRL + SUPER + Tab",    hl.dsp.window.cycle_next())                  -- Cmd+Tab
-hl.bind("CTRL + SUPER + M",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+M
-hl.bind("CTRL + SUPER + H",      hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+H
-hl.bind("CTRL + SUPER + Q",      hl.dsp.exec_cmd("loginctl lock-session"))   -- Ctrl+Cmd+Q
-hl.bind("CTRL + SUPER + left",   hl.dsp.focus({ workspace = "e-1" }))         -- Ctrl+Left
-hl.bind("CTRL + SUPER + right",  hl.dsp.focus({ workspace = "e+1" }))         -- Ctrl+Right
-hl.bind("CTRL + SUPER + 3",      hl.dsp.exec_cmd(shots .. ' && grim "$f" && wl-copy < "$f"'))                  -- Cmd+Shift+3
-hl.bind("CTRL + SUPER + 4",      hl.dsp.exec_cmd(shots .. ' && grim -g "$(slurp)" "$f" && wl-copy < "$f"'))    -- Cmd+Shift+4
-hl.bind("CTRL + SUPER + 5",      hl.dsp.exec_cmd(annotate))                   -- Cmd+Shift+5
+hl.bind(keyd .. "Tab",            hl.dsp.window.cycle_next())                  -- Cmd+Tab
+hl.bind(keyd .. "M",              hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+M
+hl.bind(keyd .. "H",              hl.dsp.window.move({ workspace = "special:magic", follow = false })) -- Cmd+H
+hl.bind(keyd .. "L",              hl.dsp.exec_cmd("loginctl lock-session"))   -- Ctrl+Cmd+Q
+hl.bind(keyd .. "left",           hl.dsp.focus({ workspace = "e-1" }))         -- Ctrl+Left
+hl.bind(keyd .. "right",          hl.dsp.focus({ workspace = "e+1" }))         -- Ctrl+Right
+hl.bind(keyd .. "S",              hl.dsp.exec_cmd(shots .. ' && grim "$f" && wl-copy < "$f"'))                  -- Cmd+Shift+3
+hl.bind(keyd .. "A",              hl.dsp.exec_cmd(shots .. ' && grim -g "$(slurp)" "$f" && wl-copy < "$f"'))    -- Cmd+Shift+4
+hl.bind(keyd .. "E",              hl.dsp.exec_cmd(annotate))                   -- Cmd+Shift+5
 hl.bind("Print",                 hl.dsp.exec_cmd(annotate))
 
 for i = 1, 10 do
     local key = i % 10
-    hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }))
+    hl.bind(keyd .. key,                     hl.dsp.focus({ workspace = i }))  -- Ctrl+1..0
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
