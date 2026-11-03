@@ -54,6 +54,10 @@ hl.config({
     dwindle = {
         preserve_split = true,
     },
+    -- A lone tiled window stays 16:9 instead of stretching across the 32:9
+    layout = {
+        single_window_aspect_ratio = "16 9",
+    },
     misc = {
         force_default_wallpaper        = 0,
         disable_hyprland_logo          = true,
@@ -98,6 +102,8 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 -- 1 on the TV, 2 on the Lenovo, pinned: a TV link drop must not move a fullscreen game to the 32:9
 hl.workspace_rule({ workspace = "1", monitor = tv,     default = true })
 hl.workspace_rule({ workspace = "2", monitor = lenovo, default = true })
+-- With 1-3 tiled windows the 32:9 keeps wallpaper margins, a bit more on the right; 4+ uses the whole screen
+hl.workspace_rule({ workspace = "m[" .. lenovo .. "] w[tv1-3]", gaps_out = { top = 96, right = 600, bottom = 96, left = 300 } })
 
 -- Super is the window key; keyd sends the Cmd and Ctrl system shortcuts as Ctrl+Alt+Super (marked below)
 local mainMod = "SUPER"
@@ -116,6 +122,7 @@ hl.bind(mainMod .. " + SHIFT + T", hl.dsp.layout("togglesplit"))
 
 for key, dir in pairs({ H = "left", L = "right", K = "up", J = "down", left = "left", right = "right", up = "up", down = "down" }) do
     hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ direction = dir }))
+    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.swap({ direction = dir }))
 end
 
 local shots = "mkdir -p ~/Pictures/Screenshots && f=~/Pictures/Screenshots/$(date +%F_%H-%M-%S).png"

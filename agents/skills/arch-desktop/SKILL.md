@@ -58,7 +58,7 @@ macOS layout on a PC keyboard: Left Alt = Cmd, Super = Option, Right Alt = AltGr
 | Super+T, Super+Return | Terminal (kitty, always inside tmux) |
 | Super+B / Super+E | Brave / Files (nautilus) |
 | Cmd+Q | Close window (Cmd+W closes tabs, Cmd+1..9 picks a browser tab) |
-| Super+arrows, Super+H/J/K/L | Focus window |
+| Super+arrows, Super+H/J/K/L | Focus window; with Shift, swap it with that neighbor |
 | Ctrl+1..0, Super+Shift+1..0 | Go to workspace / move window to it; Ctrl+Left/Right previous/next |
 | Super+V / F / P | Float / fullscreen / pseudo; Super+Shift+T toggle split |
 | Super+S, Super+Shift+S | Scratchpad; Cmd+M / Cmd+H send window to it |
