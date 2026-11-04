@@ -73,7 +73,7 @@ kitty, and every kitty window is tmux: a new window reattaches a detached sessio
 - **[`keyd-default.conf`](keyd-default.conf)**, a macOS layout on a PC keyboard: Cmd shortcuts in apps, Option for windows, Hyprland bindings that never collide with apps.
 - **NVIDIA HDMI fixes**: a patched EDID plus `nvidia_modeset` params that keep a TV's 4K@60 link up ([`system/`](system)), and audio on both displays at once ([`pipewire/`](pipewire), [`wireplumber/`](wireplumber)).
 - **[`jmpd-agents`](bin/jmpd-agents)**, a waybar icon and GTK panel for coding agent limits and token use, built on Omarchy's collectors ([`vendor/`](vendor/omarchy-agents)).
-- **[The arch-desktop skill](agents/skills/arch-desktop/SKILL.md)**: how the whole desktop fits together, written for coding agents (Claude Code, Codex) that change it.
+- **[The arch-desktop skill](agents/skills/arch-desktop/SKILL.md)**: the desktop documented for coding agents: how the pieces fit, the rules for changing them, the keys, and the traps (no tty for sudo, stale Hyprland sockets, Nerd Font glyphs lost in transcription). It lives in this repo and `jmpd.sh` links it into `~/.claude/skills` and `~/.codex/skills`, so Claude Code and Codex share one copy that changes with the configs it describes.
 
 ## Reinstalling this desktop
 
