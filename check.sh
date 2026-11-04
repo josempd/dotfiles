@@ -19,7 +19,7 @@ mapfile -t pythons < <(grep -lE '^#!.*python3' "${own[@]}")
 
 # 1. Every tracked file is installed by jmpd.sh, and every manifest source exists
 for f in "${tracked[@]}"; do
-    [[ $f =~ ^(README\.md|\.gitignore|jmpd\.sh|check\.sh|agents/) ]] && continue
+    [[ $f =~ ^(README\.md|LICENSE|\.gitignore|jmpd\.sh|check\.sh|agents/) ]] && continue
     grep -qF "$f" jmpd.sh && continue
     covered=0
     for s in "${srcs[@]}"; do [[ $f == "$s" || $f == "$s"/* ]] && covered=1 && break; done
