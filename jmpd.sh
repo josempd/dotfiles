@@ -37,7 +37,7 @@ changed() {
 PACKAGES=(
     # Base and shell
     zsh zsh-autosuggestions zsh-syntax-highlighting git curl ca-certificates base-devel unzip xdg-utils shellcheck
-    ripgrep fd fzf jq lazygit wl-clipboard tmux
+    ripgrep fd fzf jq wl-clipboard tmux
     kitty neovim bluez bluez-utils keyd openssh github-cli
     btop man-db less plocate pacman-contrib
 

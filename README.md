@@ -8,7 +8,7 @@ My Arch Linux + Hyprland desktop: one RTX 3090, a Samsung 4K TV and a 32:9 Lenov
 
 ## Look
 
-Calm and flat: spacing and shadows do the work that outlines and colors usually do. Colors come from any Omarchy theme through `jmpd-theme` (here `lawson-night`).
+Calm and flat: spacing and shadows do the work that outlines and colors usually do. Colors come from any Omarchy theme through `jmpd-theme` (here [Lawson Night](https://github.com/phuclh/omarchy-lawson-night-theme)).
 
 - **Spacing**: everything sits 12px from the screen edge (windows, bar, notifications) with 6px between windows. On the 32:9, one to three windows keep wallpaper margins and a lone window stays 16:9; from four windows on they fill the screen.
 - **Shadows, not outlines**: a 1px border in the theme's color, and focus reads as elevation: a deep shadow under the active window, a faint one under the rest. Unfocused windows are lightly frosted (95% opacity, soft blur).
@@ -48,6 +48,18 @@ macOS muscle memory on a PC keyboard. Left Alt is Cmd and Super is Option. keyd 
 
 The full list is in the [skill](agents/skills/arch-desktop/SKILL.md#keyboard-keyd--hyprland).
 
+### Terminal
+
+kitty, and every kitty window is tmux: a new window reattaches a detached session if there is one, else starts a new session. tmux owns splits and panes:
+
+| Keys | Action |
+|---|---|
+| Ctrl+Shift+D / Ctrl+Shift+S | Split side by side / stacked |
+| Ctrl+Shift+arrows | Move between panes |
+| Ctrl+Shift+W / Ctrl+Shift+Q | Close pane / whole session |
+| Option+1 / 2 / 3 | Copy the last / 2nd / 3rd command with its output |
+| Shift+Enter | Newline in Claude Code and Codex |
+
 ## Worth taking
 
 - **[`check.sh`](check.sh)**, a pre-commit hook that keeps the repo lean: every file is installed, every script is used, no guards, no drift between the repo and the live system. The rules are in the [skill](agents/skills/arch-desktop/SKILL.md#mvi-rules-minimum-viable-interface).
@@ -57,9 +69,9 @@ The full list is in the [skill](agents/skills/arch-desktop/SKILL.md#keyboard-key
 - **[`jmpd-agents`](bin/jmpd-agents)**, a waybar icon and GTK panel for coding agent limits and token use, built on Omarchy's collectors ([`vendor/`](vendor/omarchy-agents)).
 - **[The arch-desktop skill](agents/skills/arch-desktop/SKILL.md)**: how the whole desktop fits together, written for coding agents (Claude Code, Codex) that change it.
 
-## Install
+## Reinstalling this desktop
 
-On a fresh Arch install, as a sudo user:
+How I rebuild *this* machine from a fresh Arch install, as a sudo user. On other hardware, read `jmpd.sh` instead of running it.
 
 ```bash
 git clone https://github.com/josempd/dotfiles.git ~/code/dotfiles
