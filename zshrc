@@ -14,16 +14,40 @@ fi
 
 export PATH="$HOME/.local/bin:$PATH"
 
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting kubectl kubectx)
-source $ZSH/oh-my-zsh.sh
+HISTFILE=~/.zsh_history HISTSIZE=50000 SAVEHIST=10000
+setopt extended_history hist_expire_dups_first hist_ignore_dups hist_ignore_space hist_verify share_history
+
+autoload -Uz compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'r:|=*' 'l:|=* r:|=*'
+
+# Keypad mode while editing, so the terminfo keys below match inside tmux too
+zle-line-init() { echoti smkx }
+zle-line-finish() { echoti rmkx }
+zle -N zle-line-init
+zle -N zle-line-finish
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey -e
+bindkey "$terminfo[kcuu1]" up-line-or-beginning-search
+bindkey "$terminfo[kcud1]" down-line-or-beginning-search
+bindkey "$terminfo[khome]" beginning-of-line
+bindkey "$terminfo[kend]" end-of-line
+bindkey "$terminfo[kdch1]" delete-char
+bindkey "$terminfo[kcbt]" reverse-menu-complete
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+
+alias ls='ls --color=auto' grep='grep --color=auto'
 
 export EDITOR='nvim'
 
 eval "$(mise activate zsh)"
 
+source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
 source ~/.p10k.zsh
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Zed editor: Arch's package installs the command as zeditor
 alias zed=zeditor
@@ -67,3 +91,6 @@ fi
 
 # Machine-local config and secrets, untracked
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# Last, so it highlights every widget defined above
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

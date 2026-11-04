@@ -34,11 +34,9 @@ changed() {
     return 1
 }
 
-clone() { [[ -d $2 ]] || git clone -q --depth=1 "$1" "$2"; }
-
 PACKAGES=(
     # Base and shell
-    zsh git curl ca-certificates base-devel unzip xdg-utils shellcheck
+    zsh zsh-autosuggestions zsh-syntax-highlighting git curl ca-certificates base-devel unzip xdg-utils shellcheck
     ripgrep fd fzf jq lazygit wl-clipboard tmux
     kitty neovim bluez bluez-utils keyd openssh github-cli
     btop man-db less plocate pacman-contrib
@@ -47,7 +45,7 @@ PACKAGES=(
     hyprland uwsm sddm xdg-desktop-portal-hyprland polkit-kde-agent qt6-wayland qt6ct zram-generator
     python-gobject ffmpeg
     wireplumber pipewire-pulse pipewire-alsa pipewire-jack rtkit alsa-utils
-    hyprlock hypridle hyprpaper waybar wofi hyprsunset satty grim slurp
+    hyprlock hypridle hyprpaper waybar wofi satty grim slurp
     impala bluetui wiremix mako libnotify cliphist swayosd xorg-xrandr
     playerctl power-profiles-daemon ufw
     gnome-keyring xdg-desktop-portal-gtk
@@ -69,7 +67,7 @@ PACKAGES=(
     aws-cli-v2 terraform sshpass openfortivpn tailscale
 
     # AUR
-    brave-bin yaru-icon-theme hyprland-preview-share-picker-git slack-desktop cursor-bin
+    brave-bin zsh-theme-powerlevel10k yaru-icon-theme hyprland-preview-share-picker-git slack-desktop cursor-bin
 )
 
 FILES=(
@@ -186,14 +184,6 @@ setup_system() {
 setup_shell() {
     info "Shell"
     [[ $(getent passwd "$USER" | cut -d: -f7) == */zsh ]] || chsh -s /usr/bin/zsh
-    if [[ ! -d $HOME/.oh-my-zsh ]]; then
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
-            "" --unattended --keep-zshrc
-    fi
-    local custom=$HOME/.oh-my-zsh/custom
-    clone https://github.com/zsh-users/zsh-autosuggestions "$custom/plugins/zsh-autosuggestions"
-    clone https://github.com/zsh-users/zsh-syntax-highlighting "$custom/plugins/zsh-syntax-highlighting"
-    clone https://github.com/romkatv/powerlevel10k "$custom/themes/powerlevel10k"
 }
 
 setup_tools() {
