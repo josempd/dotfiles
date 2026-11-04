@@ -42,8 +42,14 @@ macOS muscle memory on a PC keyboard. Left Alt is Cmd and Super is Option. keyd 
 | Ctrl+1..0, Ctrl+Left/Right | Workspaces |
 | Super+arrows, Super+Shift+arrows | Focus / swap windows |
 | Super+Cmd+arrows | Resize the split |
-| Super+Return | Terminal (kitty in tmux) |
-| Cmd+Shift+4 | Screenshot an area |
+| Super+T, Super+Return | Terminal (kitty in tmux) |
+| Super+B / Super+E | Brave / Files |
+| Super+V / Super+F | Float / fullscreen |
+| Super+S | Scratchpad |
+| Cmd+Shift+3 / 4 / 5 | Screenshot the screen / an area / an area into satty for markup |
+| Super+Ctrl+V | Clipboard history |
+| Super+Shift+Space / Super+Ctrl+Shift+Space | Next wallpaper / theme menu |
+| Super+Ctrl+B / A / W / T | Bluetooth, audio, Wi-Fi, btop (same as the bar icons) |
 | Cmd+Escape | Power menu |
 
 The full list is in the [skill](agents/skills/arch-desktop/SKILL.md#keyboard-keyd--hyprland).
