@@ -13,13 +13,13 @@ srcs=() dests=()
 for e in "${FILES[@]}"; do srcs+=("${e%% *}"); dests+=("${e#* }"); done
 mapfile -t tracked < <(git ls-files)
 # Text files of our own: no vendored code, binaries, generated p10k or licenses
-mapfile -t own < <(printf '%s\n' "${tracked[@]}" | grep -vE '^vendor/|\.(png|bin)$|^p10k\.zsh$|LICENSE')
+mapfile -t own < <(printf '%s\n' "${tracked[@]}" | grep -vE '^vendor/|\.(png|bin|webp)$|^p10k\.zsh$|LICENSE')
 mapfile -t shells < <(grep -lE '^#!/(usr/)?bin/(env )?(ba)?sh' "${own[@]}")
 mapfile -t pythons < <(grep -lE '^#!.*python3' "${own[@]}")
 
 # 1. Every tracked file is installed by jmpd.sh, and every manifest source exists
 for f in "${tracked[@]}"; do
-    [[ $f =~ ^(README\.md|LICENSE|\.gitignore|jmpd\.sh|check\.sh|agents/) ]] && continue
+    [[ $f =~ ^(README\.md|LICENSE|screenshots/|\.gitignore|jmpd\.sh|check\.sh|agents/) ]] && continue
     grep -qF "$f" jmpd.sh && continue
     covered=0
     for s in "${srcs[@]}"; do [[ $f == "$s" || $f == "$s"/* ]] && covered=1 && break; done

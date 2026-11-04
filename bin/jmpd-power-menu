@@ -1,5 +1,5 @@
 #!/bin/bash
-# Power menu (Cmd+Escape, or click the battery in the top bar), like Omarchy's.
+# Power menu (Cmd+Escape), like Omarchy's.
 
 choice=$(printf '%s\n' \
   "󰌾  Lock" \
