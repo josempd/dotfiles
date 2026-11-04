@@ -16,7 +16,7 @@ return {
       use_libuv_file_watcher = true, -- refresh when agents create/delete files
       filtered_items = { hide_dotfiles = false, hide_gitignored = true },
       window = {
-        position = 'right', -- keep the editor next to Claude in agentdev
+        position = 'right', -- keep the editor next to Claude
         width = 32, -- default 40
         mappings = {
           ['\\'] = 'close_window',
