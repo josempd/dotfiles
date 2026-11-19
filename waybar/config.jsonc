@@ -1,5 +1,7 @@
 // Adapted from Omarchy 3.8 (config/waybar/config.jsonc); Omarchy-only modules removed.
 {
+  // Calendar colors, rendered by jmpd-theme from themes/templates/waybar-clock.jsonc
+  "include": ["~/.config/waybar/clock.jsonc"],
   "reload_style_on_change": true,
   "layer": "top",
   "position": "top",
@@ -55,7 +57,19 @@
   "clock": {
     "format": "{:L%A %H:%M}",
     "format-alt": "{:L%d %B W%V %Y}",
-    "tooltip": false
+    // Hover: month calendar; scroll changes month, right click goes back to today
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "left",
+      "iso8601": true,
+      "on-scroll": 1
+    },
+    "actions": {
+      "on-click-right": "shift_reset",
+      "on-scroll-up": "shift_down",
+      "on-scroll-down": "shift_up"
+    }
   },
   "network": {
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
