@@ -1,0 +1,14 @@
+// Rendered by jmpd-theme; waybar/config.jsonc includes it and merges it into "clock".
+{
+  "clock": {
+    "calendar": {
+      "format": {
+        "months": "<span color='{{ foreground }}'><b>{}</b></span>",
+        "weekdays": "<span color='{{ dim }}'>{}</span>",
+        "weeks": "<span color='{{ dim }}'>{:%V}</span>",
+        "days": "<span color='{{ foreground }}'>{}</span>",
+        "today": "<span color='{{ accent }}'><b><u>{}</u></b></span>"
+      }
+    }
+  }
+}

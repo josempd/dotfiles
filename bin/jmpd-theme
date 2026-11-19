@@ -28,6 +28,7 @@ THUMBS = HOME / ".cache/jmpd-theme/previews"
 
 TARGETS = {
     "waybar-theme.css": HOME / ".config/waybar/theme.css",
+    "waybar-clock.jsonc": HOME / ".config/waybar/clock.jsonc",
     "hyprland-theme.lua": HOME / ".config/hypr/theme.lua",
     "hyprlock-theme.conf": HOME / ".config/hypr/hyprlock-theme.conf",
     "hyprpaper.conf": HOME / ".config/hypr/hyprpaper.conf",
@@ -78,7 +79,16 @@ def colors(theme_dir):
     c.setdefault("lighter_background", c.get("color0", c["background"]))
     for name in ("red", "green", "yellow", "blue", "magenta", "cyan"):
         c.setdefault("bright_" + name, c[name])
+    c.setdefault("accent", c["blue"])
+    # Secondary text on popups (lighter_background), where muted can be nearly invisible
+    c["dim"] = mix(c["foreground"], c["lighter_background"], 0.45)
     return c
+
+
+def mix(a, b, t):
+    """Hex color t of the way from a to b."""
+    a, b = (tuple(int(h.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)) for h in (a, b))
+    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(a, b))
 
 
 def backgrounds(theme_dir):
