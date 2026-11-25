@@ -68,6 +68,7 @@ PACKAGES=(
 
     # AUR
     brave-bin zsh-theme-powerlevel10k yaru-icon-theme hyprland-preview-share-picker-git slack-desktop cursor-bin
+    antigravity antigravity-ide antigravity-cli
 )
 
 FILES=(
